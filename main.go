@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net/http"
 	"time"
 )
 
@@ -29,4 +32,16 @@ type Vehicle struct {
 	Registry_Command int       `json:"horaat_rishum"`
 	First_On_Road    string    `json:"moed_aliya_lakvish"`
 	Commerical_Name  string    `json:"kinuy_mishari"`
+}
+
+const endpoint = "https://data.gov.il/api/3/action/datastore_search"
+
+func main() {
+	http.HandleFunc("/vehicle/", vehiclePlateNumberHandler)
+	fmt.Println("Server is running at http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func vehiclePlateNumberHandler(w http.ResponseWriter, r *http.Request) {
+
 }
