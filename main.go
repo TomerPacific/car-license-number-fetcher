@@ -43,5 +43,14 @@ func main() {
 }
 
 func vehiclePlateNumberHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		handleGetLicensePlate(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleGetLicensePlate(w http.ResponseWriter, r *http.Request) {
 
 }
