@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -35,7 +36,7 @@ type Vehicle struct {
 	Commerical_Name  string    `json:"kinuy_mishari"`
 }
 
-const endpoint = "https://data.gov.il/api/3/action/datastore_search"
+const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
 
 func main() {
 	http.HandleFunc("/vehicle/", vehiclePlateNumberHandler)
@@ -59,5 +60,22 @@ func vehiclePlateNumberHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetLicensePlate(w http.ResponseWriter, r *http.Request) {
+	licensePlate := r.URL.Path[len("/vehicle/"):]
+	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
+	res, err := http.Get(requestUrl)
+	if err != nil {
+		fmt.Printf("error fetching license plate: %s\n", err)
+		os.Exit(1)
+	}
 
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
+		fmt.Printf("Received response")
+		resBody, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			fmt.Printf("error parsing response: %s\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Response body: %s", resBody)
+	}
 }
