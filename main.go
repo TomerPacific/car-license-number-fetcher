@@ -1,9 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -39,7 +40,13 @@ const endpoint = "https://data.gov.il/api/3/action/datastore_search"
 func main() {
 	http.HandleFunc("/vehicle/", vehiclePlateNumberHandler)
 	fmt.Println("Server is running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	err := http.ListenAndServe(":8080", nil)
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
 }
 
 func vehiclePlateNumberHandler(w http.ResponseWriter, r *http.Request) {
