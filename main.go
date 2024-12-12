@@ -112,8 +112,8 @@ func handleGetLicensePlate(w http.ResponseWriter, r *http.Request) {
 
 	var records = v.Result.Records
 
-	for _, record := range records {
-		fmt.Printf("Vehicle License Plate: %d\n", record.MisparRechev)
-	}
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(records[0])
 
 }
