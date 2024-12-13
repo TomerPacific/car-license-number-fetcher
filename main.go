@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Vehicle struct {
@@ -62,29 +64,22 @@ type Vehicle struct {
 const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
 
 func main() {
-	http.HandleFunc("/vehicle/", vehiclePlateNumberHandler)
-	fmt.Println("Server is running at http://localhost:8080")
-	err := http.ListenAndServe(":8080", nil)
-	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("server closed\n")
-	} else if err != nil {
-		fmt.Printf("error starting server: %s\n", err)
-		os.Exit(1)
+	router := gin.Default()
+	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if err := router.Run(":" + port); err != nil {
+		log.Panicf("error: %s", err)
 	}
 }
 
-func vehiclePlateNumberHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		handleGetLicensePlate(w, r)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func handleGetLicensePlate(w http.ResponseWriter, r *http.Request) {
-	licensePlate := r.URL.Path[len("/vehicle/"):]
+func getVehiclePlateNumber(c *gin.Context) {
+	licensePlate := c.Param("licensePlate")
 	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
+
 	res, err := http.Get(requestUrl)
 	if err != nil {
 		fmt.Printf("Error fetching license plate: %s\n", err)
@@ -112,8 +107,5 @@ func handleGetLicensePlate(w http.ResponseWriter, r *http.Request) {
 
 	var records = v.Result.Records
 
-	w.Header().Set("Content-Type", "application/json")
-
-	json.NewEncoder(w).Encode(records[0])
-
+	c.IndentedJSON(http.StatusOK, records[0])
 }
