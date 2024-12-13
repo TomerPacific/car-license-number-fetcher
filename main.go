@@ -13,6 +13,7 @@ import (
 )
 
 const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
+const licensePlateKey = "licensePlate"
 
 func main() {
 	router := gin.Default()
@@ -28,7 +29,13 @@ func main() {
 }
 
 func getVehiclePlateNumber(c *gin.Context) {
-	licensePlate := c.Param("licensePlate")
+	licensePlate := c.Param(licensePlateKey)
+
+	if licensePlate == "" {
+		fmt.Printf("License Plate was not found in request.")
+		os.Exit(1)
+	}
+
 	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
 
 	res, requestError := http.Get(requestUrl)
