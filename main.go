@@ -56,7 +56,30 @@ func getVehiclePlateNumber(c *gin.Context) {
 		os.Exit(1)
 	}
 
-	var records = v.Result.Records
+	var record = v.Result.Records[0]
 
-	c.IndentedJSON(http.StatusOK, records[0])
+	vehicleDetails := vehicle.VehicleDetails{
+		LicenseNumber:         record.LicenseNumber,
+		ProductionCountry:     record.ProductionCountry,
+		ModelType:             record.ModelType,
+		ManufactureCountry:    record.ManufactureCountry,
+		TrimLevel:             record.TrimLevel,
+		SafetyFeaturesLevel:   record.SafetyFeaturesLevel,
+		PollutionLevel:        record.PollutionLevel,
+		ManufacturYear:        record.ManufacturYear,
+		EngineSerialNumber:    record.EngineSerialNumber,
+		LastTestDate:          record.LastTestDate,
+		ValidDate:             record.ValidDate,
+		Ownership:             record.Ownership,
+		FrameNumber:           record.FrameNumber,
+		Color:                 record.Color,
+		FrontWheel:            record.FrontWheel,
+		RearWheel:             record.RearWheel,
+		FuelType:              record.FuelType,
+		RegisterySerialNumber: record.RegisterySerialNumber,
+		FirstOnRoadDate:       record.FirstOnRoadDate,
+		CommercialName:        record.CommercialName,
+	}
+
+	c.IndentedJSON(http.StatusOK, vehicleDetails)
 }
