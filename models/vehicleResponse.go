@@ -1,6 +1,6 @@
 package vehicle
 
-type Vehicle struct {
+type VehicleDetails struct {
 	Help    string `json:"help"`
 	Success bool   `json:"success"`
 	Result  struct {
@@ -50,7 +50,7 @@ type Vehicle struct {
 	} `json:"result"`
 }
 
-type VehicleDetails struct {
+type VehicleResponse struct {
 	LicenseNumber       int    `json:"license_plate_number"`
 	ManufactureCountry  string `json:"manufacture_country"`
 	TrimLevel           string `json:"trim_level"`

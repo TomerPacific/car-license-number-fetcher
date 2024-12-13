@@ -43,7 +43,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 		os.Exit(1)
 	}
 
-	var v vehicle.Vehicle
+	var v vehicle.VehicleDetails
 	convertingToJsonError := json.Unmarshal(resBody, &v)
 
 	if convertingToJsonError != nil {
@@ -58,7 +58,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	var record = v.Result.Records[0]
 
-	vehicleDetails := vehicle.VehicleDetails{
+	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
 		ManufactureCountry:  record.ManufactureCountry,
 		TrimLevel:           record.TrimLevel,
