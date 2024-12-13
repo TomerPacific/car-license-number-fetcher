@@ -49,3 +49,27 @@ type Vehicle struct {
 		TotalWasEstimated bool `json:"total_was_estimated"`
 	} `json:"result"`
 }
+
+type VehicleDetails struct {
+	LicenseNumber         int     `json:"license_plate_number"`
+	ProductionCountry     int     `json:"production_country"`
+	ModelType             string  `json:"model_type"`
+	ManufactureCountry    string  `json:"manufacture_country"`
+	TrimLevel             string  `json:"trim_level"`
+	SafetyFeaturesLevel   any     `json:"safety_feature_level"`
+	PollutionLevel        int     `json:"pollution_level"`
+	ManufacturYear        int     `json:"year_of_production"`
+	EngineSerialNumber    string  `json:"engine_serial_number"`
+	LastTestDate          string  `json:"last_test_date"`
+	ValidDate             string  `json:"valid_date"`
+	Ownership             string  `json:"ownership"`
+	FrameNumber           string  `json:"frame_number"`
+	Color                 string  `json:"color"`
+	FrontWheel            string  `json:"front_wheel"`
+	RearWheel             string  `json:"rear_whell"`
+	FuelType              string  `json:"fuel_type"`
+	RegisterySerialNumber int     `json:"registery_serial_number"`
+	FirstOnRoadDate       string  `json:"first_on_road_date"`
+	CommercialName        string  `json:"commercial_name"`
+	Rank                  float64 `json:"rank"`
+}
