@@ -63,7 +63,7 @@ type VehicleResponse struct {
 	FrameNumber         string `json:"frame_number"`
 	Color               string `json:"color"`
 	FrontWheel          string `json:"front_wheel"`
-	RearWheel           string `json:"rear_whell"`
+	RearWheel           string `json:"rear_wheel"`
 	FuelType            string `json:"fuel_type"`
 	FirstOnRoadDate     string `json:"first_on_road_date"`
 	CommercialName      string `json:"commercial_name"`
