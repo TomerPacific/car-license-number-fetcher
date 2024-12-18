@@ -63,6 +63,13 @@ func getVehiclePlateNumber(c *gin.Context) {
 		os.Exit(1)
 	}
 
+	records := v.Result.Records
+
+	if len(records) == 0 {
+		fmt.Printf("No matching vehicle for the license plate enntered")
+		os.Exit(1)
+	}
+
 	var record = v.Result.Records[0]
 
 	vehicleDetails := vehicle.VehicleResponse{
