@@ -32,42 +32,46 @@ func getVehiclePlateNumber(c *gin.Context) {
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		fmt.Printf("License Plate was not found in request.")
-		os.Exit(1)
+		c.JSON(http.StatusBadRequest, "License Plate was not found in request")
+		return
 	}
 
 	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		fmt.Printf("Error fetching license plate: %s\n", requestError)
-		os.Exit(1)
+		c.JSON(http.StatusBadGateway,
+			fmt.Sprintf("Error fetching license plate: %s", requestError))
+		return
 	}
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		fmt.Printf("Error parsing response: %s\n", readingResponseError)
-		os.Exit(1)
+		c.JSON(http.StatusInternalServerError,
+			fmt.Sprintf("Error parsing response: %s", readingResponseError))
+		return
 	}
 
 	var v vehicle.VehicleDetails
 	convertingToJsonError := json.Unmarshal(resBody, &v)
 
 	if convertingToJsonError != nil {
-		fmt.Printf("Error converting response: %s\n", convertingToJsonError)
-		os.Exit(1)
+		c.JSON(http.StatusInternalServerError,
+			fmt.Sprintf("Error converting response: %s", convertingToJsonError))
+		return
 	}
 
 	if !v.Success {
-		fmt.Printf("Response failure")
-		os.Exit(1)
+		c.JSON(http.StatusNotFound, "Response was not successful")
+		return
 	}
 
 	records := v.Result.Records
 
 	if len(records) == 0 {
-		fmt.Printf("No matching vehicle for the license plate enntered")
-		os.Exit(1)
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("No matching vehicle for the license plate enntered %s", licensePlate))
+		return
 	}
 
 	var record = v.Result.Records[0]
