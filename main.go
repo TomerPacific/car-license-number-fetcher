@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -76,9 +77,11 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	var record = v.Result.Records[0]
 
+	var manufacturerCountryAndName = strings.Split(record.ManufactureCountry, " ")
+
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
-		ManufactureCountry:  record.ManufactureCountry,
+		ManufacturerCountry: manufacturerCountryAndName[1],
 		TrimLevel:           record.TrimLevel,
 		SafetyFeaturesLevel: record.SafetyFeaturesLevel,
 		PollutionLevel:      record.PollutionLevel,
@@ -93,6 +96,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 		FuelType:            record.FuelType,
 		FirstOnRoadDate:     record.FirstOnRoadDate,
 		CommercialName:      record.CommercialName,
+		ManufacturerName:    manufacturerCountryAndName[0],
 	}
 
 	c.IndentedJSON(http.StatusOK, vehicleDetails)
