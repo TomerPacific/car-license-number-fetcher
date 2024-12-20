@@ -52,7 +52,7 @@ type VehicleDetails struct {
 
 type VehicleResponse struct {
 	LicenseNumber       int    `json:"license_plate_number"`
-	ManufactureCountry  string `json:"manufacture_country"`
+	ManufacturerCountry string `json:"manufacturer_country"`
 	TrimLevel           string `json:"trim_level"`
 	SafetyFeaturesLevel any    `json:"safety_feature_level"`
 	PollutionLevel      int    `json:"pollution_level"`
@@ -67,4 +67,5 @@ type VehicleResponse struct {
 	FuelType            string `json:"fuel_type"`
 	FirstOnRoadDate     string `json:"first_on_road_date"`
 	CommercialName      string `json:"commercial_name"`
+	ManufacturerName    string `json:"manufacturer_name"`
 }
