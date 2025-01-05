@@ -18,6 +18,7 @@ const licensePlateKey = "licensePlate"
 
 func main() {
 	router := gin.Default()
+	router.SetTrustedProxies(nil)
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 
 	port := os.Getenv("PORT")
