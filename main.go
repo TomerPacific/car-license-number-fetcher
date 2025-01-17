@@ -26,7 +26,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = ":8080"
 	}
 
 	if runningServerError := router.RunTLS(port, certFile, keyFile); runningServerError != nil {
