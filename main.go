@@ -16,8 +16,6 @@ import (
 
 const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
 const licensePlateKey = "licensePlate"
-const certFile = "server.crt"
-const keyFile = "server.key"
 
 func main() {
 	router := gin.Default()
@@ -26,10 +24,10 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
 
-	if runningServerError := router.RunTLS(port, certFile, keyFile); runningServerError != nil {
+	if runningServerError := router.Run(":" + port); runningServerError != nil {
 		log.Panicf("Running server encountered an error: %s", runningServerError)
 	}
 }
