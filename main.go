@@ -36,15 +36,15 @@ func main() {
 
 func getVehiclePlateNumber(c *gin.Context) {
 
-	// if !isRequestFromMobile(c.Request.UserAgent()) {
-	// 	c.JSON(http.StatusBadRequest, "Request is not from a mobile device")
-	// 	return
-	// }
+	if !isRequestFromMobile(c.Request.UserAgent()) {
+		c.JSON(http.StatusBadRequest, errors.New("request is not from a mobile device"))
+		return
+	}
 
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		c.JSON(http.StatusBadRequest, "License Plate was not found in request")
+		c.JSON(http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
@@ -53,14 +53,14 @@ func getVehiclePlateNumber(c *gin.Context) {
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
 		c.JSON(http.StatusBadGateway,
-			errors.New(fmt.Sprintf("Error fetching license plate: %s", requestError)))
+			fmt.Errorf("error fetching license plate: %s", requestError))
 		return
 	}
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
 		c.JSON(http.StatusInternalServerError,
-			fmt.Sprintf("Error parsing response: %s", readingResponseError))
+			fmt.Errorf("error parsing response: %s", readingResponseError))
 		return
 	}
 
@@ -69,12 +69,12 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	if convertingToJsonError != nil {
 		c.JSON(http.StatusInternalServerError,
-			fmt.Sprintf("Error converting response: %s", convertingToJsonError))
+			fmt.Errorf("error converting response: %s", convertingToJsonError))
 		return
 	}
 
 	if !v.Success {
-		c.JSON(http.StatusNotFound, "Response was not successful")
+		c.JSON(http.StatusNotFound, errors.New("response was not successful"))
 		return
 	}
 
@@ -82,7 +82,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	if len(records) == 0 {
 		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("No matching vehicle for the license plate enntered %s", licensePlate))
+			fmt.Errorf("no matching vehicle for the license plate enntered %s", licensePlate))
 		return
 	}
 
