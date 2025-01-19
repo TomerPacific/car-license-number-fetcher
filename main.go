@@ -34,10 +34,10 @@ func main() {
 
 func getVehiclePlateNumber(c *gin.Context) {
 
-	if !isRequestFromMobile(c.Request.UserAgent()) {
-		c.JSON(http.StatusBadRequest, "Request is not from a mobile device")
-		return
-	}
+	// if !isRequestFromMobile(c.Request.UserAgent()) {
+	// 	c.JSON(http.StatusBadRequest, "Request is not from a mobile device")
+	// 	return
+	// }
 
 	licensePlate := c.Param(licensePlateKey)
 
