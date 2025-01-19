@@ -3,6 +3,7 @@ package main
 import (
 	vehicle "car-license-number-fetcher/models"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -20,6 +21,7 @@ const licensePlateKey = "licensePlate"
 func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
+	router.Use(gin.ErrorLogger())
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 
 	port := os.Getenv("PORT")
@@ -51,7 +53,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
 		c.JSON(http.StatusBadGateway,
-			fmt.Sprintf("Error fetching license plate: %s", requestError))
+			errors.New(fmt.Sprintf("Error fetching license plate: %s", requestError)))
 		return
 	}
 
