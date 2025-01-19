@@ -3,7 +3,6 @@ package main
 import (
 	vehicle "car-license-number-fetcher/models"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -21,7 +20,6 @@ const licensePlateKey = "licensePlate"
 func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
-	router.Use(gin.ErrorLogger())
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 
 	port := os.Getenv("PORT")
@@ -44,7 +42,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		c.JSON(http.StatusBadRequest, errors.New("license Plate was not found in request"))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "license Plate was not found in request"})
 		return
 	}
 
@@ -53,14 +51,14 @@ func getVehiclePlateNumber(c *gin.Context) {
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
 		c.JSON(http.StatusBadGateway,
-			fmt.Errorf("error fetching license plate: %s", requestError))
+			gin.H{"error": fmt.Sprintf("error fetching license plate: %s", requestError)})
 		return
 	}
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
 		c.JSON(http.StatusInternalServerError,
-			fmt.Errorf("error parsing response: %s", readingResponseError))
+			gin.H{"error": fmt.Sprintf("error parsing response: %s", readingResponseError)})
 		return
 	}
 
@@ -69,12 +67,12 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	if convertingToJsonError != nil {
 		c.JSON(http.StatusInternalServerError,
-			fmt.Errorf("error converting response: %s", convertingToJsonError))
+			gin.H{"error": fmt.Sprintf("error converting response: %s", convertingToJsonError)})
 		return
 	}
 
 	if !v.Success {
-		c.JSON(http.StatusNotFound, errors.New("response was not successful"))
+		c.JSON(http.StatusNotFound, gin.H{"error": "response was not successful"})
 		return
 	}
 
@@ -82,7 +80,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	if len(records) == 0 {
 		c.JSON(http.StatusNotFound,
-			fmt.Errorf("no matching vehicle for the license plate enntered %s", licensePlate))
+			gin.H{"error": fmt.Sprintf("no matching vehicle for the license plate enntered %s", licensePlate)})
 		return
 	}
 
