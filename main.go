@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -112,6 +111,5 @@ func getVehiclePlateNumber(c *gin.Context) {
 }
 
 func isRequestFromMobile(userAgent string) bool {
-	match, _ := regexp.MatchString("Android", userAgent)
-	return match
+	return strings.Contains(userAgent, "Android")
 }
