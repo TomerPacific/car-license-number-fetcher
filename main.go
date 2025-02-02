@@ -2,24 +2,30 @@ package main
 
 import (
 	vehicle "car-license-number-fetcher/models"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 )
 
 const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
 const licensePlateKey = "licensePlate"
+const vehicleNameKey = "vehicleName"
 
 func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
+	router.GET("/review/:vehicleName", getVehicleReview)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -108,6 +114,46 @@ func getVehiclePlateNumber(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, vehicleDetails)
+}
+
+func getVehicleReview(c *gin.Context) {
+	if !isRequestFromMobile(c.Request.UserAgent()) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
+		return
+	}
+
+	vehicleName, error := url.QueryUnescape(c.Param(vehicleNameKey))
+
+	if error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+		return
+	}
+
+	if vehicleName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "vehicle name was not found in request"})
+		return
+	}
+
+	client := openai.NewClient(
+		option.WithAPIKey(os.Getenv("OPENAPI_KEY")))
+
+	question := fmt.Sprintf("Give a pros and cons list of the %s Israeli Model", vehicleName)
+
+	completion, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage(question),
+		}),
+		Seed:  openai.Int(1),
+		Model: openai.F(openai.ChatModelGPT3_5Turbo),
+	})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, completion.Choices[0].Message.Content)
+
 }
 
 func isRequestFromMobile(userAgent string) bool {
