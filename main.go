@@ -117,7 +117,6 @@ func getVehiclePlateNumber(c *gin.Context) {
 }
 
 func getVehicleReview(c *gin.Context) {
-	log.Println("getVehicleReview")
 	if !isRequestFromMobile(c.Request.UserAgent()) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
 		return
