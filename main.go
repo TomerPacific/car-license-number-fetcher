@@ -122,6 +122,8 @@ func getVehicleReview(c *gin.Context) {
 		return
 	}
 
+	log.Printf("getVehicleReview")
+
 	vehicleName, error := url.QueryUnescape(c.Param(vehicleNameKey))
 
 	if error != nil {
