@@ -157,5 +157,6 @@ func getVehicleReview(c *gin.Context) {
 }
 
 func isRequestFromMobile(userAgent string) bool {
-	return strings.Contains(userAgent, "Android")
+	println(userAgent)
+	return strings.Contains(userAgent, "Ktor client")
 }
