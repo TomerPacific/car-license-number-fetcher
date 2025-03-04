@@ -90,8 +90,13 @@ func getVehiclePlateNumber(c *gin.Context) {
 	}
 
 	var record = v.Result.Records[0]
+	var splitManufactureCountryCharacter = " "
 
-	var manufacturerCountryAndName = strings.Split(record.ManufactureCountry, " ")
+	if strings.Contains(record.ManufactureCountry, "-") {
+		splitManufactureCountryCharacter = "-"
+	}
+
+	var manufacturerCountryAndName = strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
