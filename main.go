@@ -61,6 +61,8 @@ func getVehiclePlateNumber(c *gin.Context) {
 		return
 	}
 
+	defer res.Body.Close()
+
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
 		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error parsing response: %s", readingResponseError))
@@ -68,9 +70,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 	}
 
 	var v vehicle.VehicleDetails
-	convertingToJsonError := json.Unmarshal(resBody, &v)
-
-	if convertingToJsonError != nil {
+	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
 		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error converting response: %s", convertingToJsonError))
 		return
 	}
@@ -87,14 +87,9 @@ func getVehiclePlateNumber(c *gin.Context) {
 		return
 	}
 
-	var record = v.Result.Records[0]
-	var splitManufactureCountryCharacter = " "
-
-	if strings.Contains(record.ManufactureCountry, "-") {
-		splitManufactureCountryCharacter = "-"
-	}
-
-	var manufacturerCountryAndName = strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
+	var record = records[0]
+	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
+	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
@@ -169,6 +164,16 @@ func getPort() string {
 		port = defaultPort
 	}
 	return port
+}
+
+/**
+ * Manufacture country can sometimes be separated by a dash or by a space
+ */
+func getSplitCharacter(country string) string {
+	if strings.Contains(country, "-") {
+		return "-"
+	}
+	return " "
 }
 
 func isRequestFromMobile(userAgent string) bool {
