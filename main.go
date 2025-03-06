@@ -33,12 +33,9 @@ func main() {
 	router.GET("/review/:vehicleName", getVehicleReview)
 
 	port := getPort()
-	if port == "" {
-		port = defaultPort
-	}
 
 	if runningServerError := router.Run(":" + port); runningServerError != nil {
-		log.Panicf("Running server encountered an error: %s", runningServerError)
+		log.Fatalf("Running server encountered an error: %s", runningServerError)
 	}
 }
 
