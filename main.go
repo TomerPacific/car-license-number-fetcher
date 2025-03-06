@@ -17,9 +17,11 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
-const licensePlateKey = "licensePlate"
-const vehicleNameKey = "vehicleName"
+const (
+	endpoint        = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
+	licensePlateKey = "licensePlate"
+	vehicleNameKey  = "vehicleName"
+)
 
 func main() {
 	router := gin.Default()
