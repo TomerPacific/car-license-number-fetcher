@@ -18,9 +18,12 @@ import (
 )
 
 const (
-	endpoint        = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
-	licensePlateKey = "licensePlate"
-	vehicleNameKey  = "vehicleName"
+	endpoint           = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
+	licensePlateKey    = "licensePlate"
+	vehicleNameKey     = "vehicleName"
+	defaultPort        = "8080"
+	openAIAPIKeyEnvVar = "OPENAPI_KEY"
+	mobileUserAgent    = "Ktor client"
 )
 
 func main() {
@@ -31,7 +34,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = defaultPort
 	}
 
 	if runningServerError := router.Run(":" + port); runningServerError != nil {
@@ -142,7 +145,7 @@ func getVehicleReview(c *gin.Context) {
 	}
 
 	client := openai.NewClient(
-		option.WithAPIKey(os.Getenv("OPENAPI_KEY")))
+		option.WithAPIKey(os.Getenv(openAIAPIKeyEnvVar)))
 
 	question := fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
 
@@ -164,5 +167,5 @@ func getVehicleReview(c *gin.Context) {
 }
 
 func isRequestFromMobile(userAgent string) bool {
-	return strings.Contains(userAgent, "Ktor client")
+	return strings.Contains(userAgent, mobileUserAgent)
 }
