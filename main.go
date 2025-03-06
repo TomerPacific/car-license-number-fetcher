@@ -42,14 +42,14 @@ func main() {
 func getVehiclePlateNumber(c *gin.Context) {
 
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
+		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
 		return
 	}
 
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "license Plate was not found in request"})
+		respondWithError(c, http.StatusBadRequest, "license Plate was not found in request")
 		return
 	}
 
@@ -57,15 +57,13 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		c.JSON(http.StatusBadGateway,
-			gin.H{"error": fmt.Sprintf("error fetching license plate: %s", requestError)})
+		respondWithError(c, http.StatusBadGateway, fmt.Sprintf("error fetching license plate: %s", requestError))
 		return
 	}
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": fmt.Sprintf("error parsing response: %s", readingResponseError)})
+		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error parsing response: %s", readingResponseError))
 		return
 	}
 
@@ -73,21 +71,19 @@ func getVehiclePlateNumber(c *gin.Context) {
 	convertingToJsonError := json.Unmarshal(resBody, &v)
 
 	if convertingToJsonError != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": fmt.Sprintf("error converting response: %s", convertingToJsonError)})
+		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error converting response: %s", convertingToJsonError))
 		return
 	}
 
 	if !v.Success {
-		c.JSON(http.StatusNotFound, gin.H{"error": "response was not successful"})
+		respondWithError(c, http.StatusNotFound, "response was not successful")
 		return
 	}
 
 	records := v.Result.Records
 
 	if len(records) == 0 {
-		c.JSON(http.StatusNotFound,
-			gin.H{"error": fmt.Sprintf("no matching vehicle for the license plate enntered %s", licensePlate)})
+		respondWithError(c, http.StatusNotFound, fmt.Sprintf("no matching vehicle for the license plate entered %s", licensePlate))
 		return
 	}
 
@@ -161,6 +157,10 @@ func getVehicleReview(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, completion.Choices[0].Message.Content)
 
+}
+
+func respondWithError(c *gin.Context, code int, message string) {
+	c.JSON(code, gin.H{"error": message})
 }
 
 func getPort() string {
