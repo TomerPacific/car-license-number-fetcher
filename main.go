@@ -32,7 +32,7 @@ func main() {
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 	router.GET("/review/:vehicleName", getVehicleReview)
 
-	port := os.Getenv("PORT")
+	port := getPort()
 	if port == "" {
 		port = defaultPort
 	}
@@ -164,6 +164,14 @@ func getVehicleReview(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, completion.Choices[0].Message.Content)
 
+}
+
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	return port
 }
 
 func isRequestFromMobile(userAgent string) bool {
