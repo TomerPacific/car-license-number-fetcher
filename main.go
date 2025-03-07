@@ -24,6 +24,7 @@ const (
 	defaultPort        = "8080"
 	openAIAPIKeyEnvVar = "OPENAPI_KEY"
 	mobileUserAgent    = "Ktor client"
+	errorKey           = "error"
 )
 
 func main() {
@@ -155,7 +156,7 @@ func getVehicleReview(c *gin.Context) {
 }
 
 func respondWithError(c *gin.Context, code int, message string) {
-	c.JSON(code, gin.H{"error": message})
+	c.JSON(code, gin.H{errorKey: message})
 }
 
 func getPort() string {
