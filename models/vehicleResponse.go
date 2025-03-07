@@ -50,6 +50,7 @@ type VehicleDetails struct {
 	} `json:"result"`
 }
 
+// VehicleResponse represents the structured response for a vehicle
 type VehicleResponse struct {
 	LicenseNumber       int    `json:"license_plate_number"`
 	ManufacturerCountry string `json:"manufacturer_country"`

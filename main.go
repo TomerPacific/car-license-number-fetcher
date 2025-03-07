@@ -17,9 +17,15 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-const endpoint = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
-const licensePlateKey = "licensePlate"
-const vehicleNameKey = "vehicleName"
+const (
+	endpoint           = "https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&limit=1&q="
+	licensePlateKey    = "licensePlate"
+	vehicleNameKey     = "vehicleName"
+	defaultPort        = "8080"
+	openAIAPIKeyEnvVar = "OPENAPI_KEY"
+	mobileUserAgent    = "Ktor client"
+	errorKey           = "error"
+)
 
 func main() {
 	router := gin.Default()
@@ -27,27 +33,24 @@ func main() {
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 	router.GET("/review/:vehicleName", getVehicleReview)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	port := getPort()
 
 	if runningServerError := router.Run(":" + port); runningServerError != nil {
-		log.Panicf("Running server encountered an error: %s", runningServerError)
+		log.Fatalf("Running server encountered an error: %s", runningServerError)
 	}
 }
 
 func getVehiclePlateNumber(c *gin.Context) {
 
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
+		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
 		return
 	}
 
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "license Plate was not found in request"})
+		respondWithError(c, http.StatusBadRequest, "license Plate was not found in request")
 		return
 	}
 
@@ -55,48 +58,39 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		c.JSON(http.StatusBadGateway,
-			gin.H{"error": fmt.Sprintf("error fetching license plate: %s", requestError)})
+		respondWithError(c, http.StatusBadGateway, fmt.Sprintf("error fetching license plate: %s", requestError))
 		return
 	}
 
+	defer res.Body.Close()
+
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": fmt.Sprintf("error parsing response: %s", readingResponseError)})
+		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error parsing response: %s", readingResponseError))
 		return
 	}
 
 	var v vehicle.VehicleDetails
-	convertingToJsonError := json.Unmarshal(resBody, &v)
-
-	if convertingToJsonError != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": fmt.Sprintf("error converting response: %s", convertingToJsonError)})
+	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
+		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error converting response: %s", convertingToJsonError))
 		return
 	}
 
 	if !v.Success {
-		c.JSON(http.StatusNotFound, gin.H{"error": "response was not successful"})
+		respondWithError(c, http.StatusNotFound, "response was not successful")
 		return
 	}
 
 	records := v.Result.Records
 
 	if len(records) == 0 {
-		c.JSON(http.StatusNotFound,
-			gin.H{"error": fmt.Sprintf("no matching vehicle for the license plate enntered %s", licensePlate)})
+		respondWithError(c, http.StatusNotFound, fmt.Sprintf("no matching vehicle for the license plate entered %s", licensePlate))
 		return
 	}
 
-	var record = v.Result.Records[0]
-	var splitManufactureCountryCharacter = " "
-
-	if strings.Contains(record.ManufactureCountry, "-") {
-		splitManufactureCountryCharacter = "-"
-	}
-
-	var manufacturerCountryAndName = strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
+	var record = records[0]
+	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
+	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
@@ -123,24 +117,24 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 func getVehicleReview(c *gin.Context) {
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
+		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
 		return
 	}
 
 	vehicleName, error := url.QueryUnescape(c.Param(vehicleNameKey))
 
 	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+		respondWithError(c, http.StatusBadRequest, error.Error())
 		return
 	}
 
 	if vehicleName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "vehicle name was not found in request"})
+		respondWithError(c, http.StatusBadRequest, "vehicle name was not found in request")
 		return
 	}
 
 	client := openai.NewClient(
-		option.WithAPIKey(os.Getenv("OPENAPI_KEY")))
+		option.WithAPIKey(os.Getenv(openAIAPIKeyEnvVar)))
 
 	question := fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
 
@@ -153,7 +147,7 @@ func getVehicleReview(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -161,6 +155,28 @@ func getVehicleReview(c *gin.Context) {
 
 }
 
+func respondWithError(c *gin.Context, code int, message string) {
+	c.JSON(code, gin.H{errorKey: message})
+}
+
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	return port
+}
+
+/**
+ * Manufacture country can sometimes be separated by a dash or by a space
+ */
+func getSplitCharacter(country string) string {
+	if strings.Contains(country, "-") {
+		return "-"
+	}
+	return " "
+}
+
 func isRequestFromMobile(userAgent string) bool {
-	return strings.Contains(userAgent, "Ktor client")
+	return strings.Contains(userAgent, mobileUserAgent)
 }
