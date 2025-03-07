@@ -116,19 +116,19 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 func getVehicleReview(c *gin.Context) {
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "request is not from a mobile device"})
+		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
 		return
 	}
 
 	vehicleName, error := url.QueryUnescape(c.Param(vehicleNameKey))
 
 	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+		respondWithError(c, http.StatusBadRequest, error.Error())
 		return
 	}
 
 	if vehicleName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "vehicle name was not found in request"})
+		respondWithError(c, http.StatusBadRequest, "vehicle name was not found in request")
 		return
 	}
 
@@ -146,7 +146,7 @@ func getVehicleReview(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
