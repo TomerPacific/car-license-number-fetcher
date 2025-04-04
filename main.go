@@ -93,7 +93,12 @@ func getVehiclePlateNumber(c *gin.Context) {
 	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
 	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
-	safetyFeatuesLevel := parseSafetyFeaturesLevelField(record, c)
+	safetyFeatuesLevel, conversionError := parseSafetyFeaturesLevelField(record)
+
+	if conversionError != nil {
+		respondWithError(c, http.StatusNotFound, fmt.Sprintf("error converting safetyFeaturesLevel from string to int %s", conversionError))
+		return
+	}
 
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
@@ -184,7 +189,7 @@ func isRequestFromMobile(userAgent string) bool {
 	return strings.Contains(userAgent, mobileUserAgent)
 }
 
-func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord, c *gin.Context) int {
+func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 	var safetyFeatuesLevel = 0
 	if record.SafetyFeaturesLevel != nil {
 		safetyFeaturesLevelString, ok := record.SafetyFeaturesLevel.(string)
@@ -193,12 +198,11 @@ func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord, c *gin.Context)
 		} else {
 			convertedSafetyFeaturesLevel, conversionError := strconv.Atoi(safetyFeaturesLevelString)
 			if conversionError != nil {
-				respondWithError(c, http.StatusNotFound, fmt.Sprintf("error converting safetyFeaturesLevel from string to int %s", conversionError))
-				return 0
+				return -1, conversionError
 			}
 			safetyFeatuesLevel = convertedSafetyFeaturesLevel
 		}
 	}
 
-	return safetyFeatuesLevel
+	return safetyFeatuesLevel, nil
 }
