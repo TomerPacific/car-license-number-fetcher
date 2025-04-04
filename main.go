@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -92,11 +93,17 @@ func getVehiclePlateNumber(c *gin.Context) {
 	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
 	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
+	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
+	if conversionError != nil {
+		respondWithError(c, http.StatusNotFound, fmt.Sprintf("error converting safetyFeaturesLevel from string to int %s", conversionError))
+		return
+	}
+
 	vehicleDetails := vehicle.VehicleResponse{
 		LicenseNumber:       record.LicenseNumber,
 		ManufacturerCountry: manufacturerCountryAndName[1],
 		TrimLevel:           record.TrimLevel,
-		SafetyFeaturesLevel: record.SafetyFeaturesLevel,
+		SafetyFeaturesLevel: safetyFeaturesLevel,
 		PollutionLevel:      record.PollutionLevel,
 		ManufacturYear:      record.ManufacturYear,
 		LastTestDate:        record.LastTestDate,
@@ -179,4 +186,20 @@ func getSplitCharacter(country string) string {
 
 func isRequestFromMobile(userAgent string) bool {
 	return strings.Contains(userAgent, mobileUserAgent)
+}
+
+func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
+	var safetyFeaturesLevel = 0
+	if record.SafetyFeaturesLevel != nil {
+		switch v := record.SafetyFeaturesLevel.(type) {
+		case string:
+			convertedSafetyFeaturesLevel, conversionError := strconv.Atoi(v)
+			if conversionError != nil {
+				return -1, conversionError
+			}
+			safetyFeaturesLevel = convertedSafetyFeaturesLevel
+		}
+	}
+
+	return safetyFeaturesLevel, nil
 }
