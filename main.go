@@ -93,8 +93,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
 	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
 
-	safetyFeatuesLevel, conversionError := parseSafetyFeaturesLevelField(record)
-
+	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
 	if conversionError != nil {
 		respondWithError(c, http.StatusNotFound, fmt.Sprintf("error converting safetyFeaturesLevel from string to int %s", conversionError))
 		return
