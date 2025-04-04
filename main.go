@@ -103,7 +103,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 		LicenseNumber:       record.LicenseNumber,
 		ManufacturerCountry: manufacturerCountryAndName[1],
 		TrimLevel:           record.TrimLevel,
-		SafetyFeaturesLevel: safetyFeatuesLevel,
+		SafetyFeaturesLevel: safetyFeaturesLevel,
 		PollutionLevel:      record.PollutionLevel,
 		ManufacturYear:      record.ManufacturYear,
 		LastTestDate:        record.LastTestDate,
