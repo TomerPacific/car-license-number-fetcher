@@ -32,7 +32,7 @@ type VehicleDetails struct {
 			FrontWheel            string  `json:"zmig_kidmi"`
 			RearWheel             string  `json:"zmig_ahori"`
 			FuelType              string  `json:"sug_delek_nm"`
-			RegisterySerialNumber any     `json:"horaat_rishum"`
+			RegistrySerialNumber  any     `json:"horaat_rishum"`
 			FirstOnRoadDate       string  `json:"moed_aliya_lakvish"`
 			CommercialName        string  `json:"kinuy_mishari"`
 			Rank                  float64 `json:"rank"`
