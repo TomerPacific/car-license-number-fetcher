@@ -191,11 +191,9 @@ func isRequestFromMobile(userAgent string) bool {
 func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 	var safetyFeaturesLevel = 0
 	if record.SafetyFeaturesLevel != nil {
-		safetyFeaturesLevelString, ok := record.SafetyFeaturesLevel.(string)
-		if !ok {
-			safetyFeaturesLevel = record.SafetyFeaturesLevel.(int)
-		} else {
-			convertedSafetyFeaturesLevel, conversionError := strconv.Atoi(safetyFeaturesLevelString)
+		switch v := record.SafetyFeaturesLevel.(type) {
+		case string:
+			convertedSafetyFeaturesLevel, conversionError := strconv.Atoi(v)
 			if conversionError != nil {
 				return -1, conversionError
 			}
