@@ -86,7 +86,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 	records := v.Result.Records
 
 	if len(records) == 0 {
-		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %w", licensePlate))
+		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate))
 		return
 	}
 
