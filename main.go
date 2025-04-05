@@ -4,6 +4,7 @@ import (
 	vehicle "car-license-number-fetcher/models"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -44,14 +45,14 @@ func main() {
 func getVehiclePlateNumber(c *gin.Context) {
 
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
+		respondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
 		return
 	}
 
 	licensePlate := c.Param(licensePlateKey)
 
 	if licensePlate == "" {
-		respondWithError(c, http.StatusBadRequest, "license Plate was not found in request")
+		respondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
@@ -59,7 +60,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		respondWithError(c, http.StatusBadGateway, fmt.Sprintf("error fetching license plate: %s", requestError))
+		respondWithError(c, http.StatusBadGateway, fmt.Errorf("error fetching license plate: %w", requestError))
 		return
 	}
 
@@ -67,25 +68,25 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error parsing response: %s", readingResponseError))
+		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error parsing response: %w", readingResponseError))
 		return
 	}
 
 	var v vehicle.VehicleDetails
 	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Sprintf("error converting response: %s", convertingToJsonError))
+		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error converting response: %w", convertingToJsonError))
 		return
 	}
 
 	if !v.Success {
-		respondWithError(c, http.StatusNotFound, "response was not successful")
+		respondWithError(c, http.StatusNotFound, errors.New("response was not successful"))
 		return
 	}
 
 	records := v.Result.Records
 
 	if len(records) == 0 {
-		respondWithError(c, http.StatusNotFound, fmt.Sprintf("no matching vehicle for the license plate entered %s", licensePlate))
+		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %w", licensePlate))
 		return
 	}
 
@@ -95,7 +96,7 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
 	if conversionError != nil {
-		respondWithError(c, http.StatusNotFound, fmt.Sprintf("error converting safetyFeaturesLevel from string to int %s", conversionError))
+		respondWithError(c, http.StatusNotFound, fmt.Errorf("error converting safetyFeaturesLevel from string to int %w", conversionError))
 		return
 	}
 
@@ -124,19 +125,19 @@ func getVehiclePlateNumber(c *gin.Context) {
 
 func getVehicleReview(c *gin.Context) {
 	if !isRequestFromMobile(c.Request.UserAgent()) {
-		respondWithError(c, http.StatusBadRequest, "request is not from a mobile device")
+		respondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
 		return
 	}
 
 	vehicleName, error := url.QueryUnescape(c.Param(vehicleNameKey))
 
 	if error != nil {
-		respondWithError(c, http.StatusBadRequest, error.Error())
+		respondWithError(c, http.StatusBadRequest, error)
 		return
 	}
 
 	if vehicleName == "" {
-		respondWithError(c, http.StatusBadRequest, "vehicle name was not found in request")
+		respondWithError(c, http.StatusBadRequest, errors.New("vehicle name was not found in request"))
 		return
 	}
 
@@ -154,7 +155,7 @@ func getVehicleReview(c *gin.Context) {
 	})
 
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err.Error())
+		respondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -162,8 +163,8 @@ func getVehicleReview(c *gin.Context) {
 
 }
 
-func respondWithError(c *gin.Context, code int, message string) {
-	c.JSON(code, gin.H{errorKey: message})
+func respondWithError(c *gin.Context, code int, error error) {
+	c.JSON(code, gin.H{errorKey: error.Error()})
 }
 
 func getPort() string {
