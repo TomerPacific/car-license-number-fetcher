@@ -144,7 +144,14 @@ func getVehicleReview(c *gin.Context) {
 	client := openai.NewClient(
 		option.WithAPIKey(os.Getenv(openAIAPIKeyEnvVar)))
 
-	question := fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
+	language := c.GetHeader("Accept-Language")
+	question := ""
+
+	if language == "en" {
+		question = fmt.Sprintf("Give a pros and cons list of %s", vehicleName)
+	} else {
+		question = fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
+	}
 
 	completion, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
 		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
