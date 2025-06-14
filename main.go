@@ -207,7 +207,7 @@ func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 
 func getQuestionBasedOnLocale(c *gin.Context, vehicleName string) string {
 	language := c.GetHeader("Accept-Language")
-	if language == "en" {
+	if strings.HasPrefix(language, "en") {
 		return fmt.Sprintf("Give a pros and cons list of %s", vehicleName)
 	}
 
