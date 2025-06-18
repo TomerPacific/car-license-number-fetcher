@@ -144,7 +144,7 @@ func getVehicleReview(c *gin.Context) {
 	client := openai.NewClient(
 		option.WithAPIKey(os.Getenv(openAIAPIKeyEnvVar)))
 
-	question := fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
+	question := getQuestionBasedOnLocale(c, vehicleName)
 
 	completion, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
 		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
@@ -203,4 +203,14 @@ func parseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 	}
 
 	return safetyFeaturesLevel, nil
+}
+
+func getQuestionBasedOnLocale(c *gin.Context, vehicleName string) string {
+	language := c.GetHeader("Accept-Language")
+	if strings.HasPrefix(language, "en") {
+		return fmt.Sprintf("Give a pros and cons list of %s", vehicleName)
+	}
+
+	return fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
+
 }
