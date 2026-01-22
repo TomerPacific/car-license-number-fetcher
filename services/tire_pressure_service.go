@@ -9,7 +9,6 @@ import (
 	"os"
 
 	config "car-license-number-fetcher/config"
-	tirePressure "car-license-number-fetcher/models"
 	vehicle "car-license-number-fetcher/models"
 )
 
@@ -50,22 +49,23 @@ type WheelSizeTirePressure struct {
 
 // FetchTirePressureByVehicleDetails fetches tire pressure information from the wheel-size API
 // based on the provided vehicle details. Returns the tire pressure response or an error.
-func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (tirePressure.TirePressureResponse, error) {
+func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (vehicle.TirePressureResponse, error) {
 	apiKey := os.Getenv(config.WheelSizeAPIKeyEnvVar)
 	if apiKey == "" {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("WHEEL_SIZE_KEY environment variable is not set")
+		return vehicle.TirePressureResponse{}, fmt.Errorf("WHEEL_SIZE_KEY environment variable is not set")
 	}
 
 	// Build the request URL with query parameters
 	baseURL, err := url.Parse(config.WheelSizeAPIEndpoint)
 	if err != nil {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API endpoint: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API endpoint: %w", err)
 	}
 
 	params := url.Values{}
 	params.Add("make", vehicleDetails.ManufacturerName)
 	params.Add("model", vehicleDetails.CommercialName)
 	params.Add("year", fmt.Sprintf("%d", vehicleDetails.ManufacturYear))
+	params.Add("region", config.WheelSizeDefaultRegion)
 	params.Add("user_key", apiKey)
 
 	// Modification is optional - only add if we have a way to determine it
@@ -75,7 +75,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	// Create HTTP request
 	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("error creating request: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -84,31 +84,31 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("error fetching tire pressure: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("error fetching tire pressure: %w", err)
 	}
 	defer res.Body.Close()
 
 	// Check status code
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("wheel-size API returned status %d: %s", res.StatusCode, string(body))
+		return vehicle.TirePressureResponse{}, fmt.Errorf("wheel-size API returned status %d: %s", res.StatusCode, string(body))
 	}
 
 	// Read response body
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("error reading response: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("error reading response: %w", err)
 	}
 
 	// Parse the response
 	var wheelSizeResponse WheelSizeAPIResponse
 	if err := json.Unmarshal(resBody, &wheelSizeResponse); err != nil {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API response: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API response: %w", err)
 	}
 
 	// Check if we have any data
 	if len(wheelSizeResponse.Data) == 0 {
-		return tirePressure.TirePressureResponse{}, fmt.Errorf("no vehicle data found in wheel-size API response")
+		return vehicle.TirePressureResponse{}, fmt.Errorf("no vehicle data found in wheel-size API response")
 	}
 
 	// Extract tire pressure from the first vehicle's wheels
@@ -147,7 +147,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	}
 
 	// Build the response
-	tirePressureResponse := tirePressure.TirePressureResponse{
+	tirePressureResponse := vehicle.TirePressureResponse{
 		Source:   "wheel-size.com",
 		FrontPsi: frontPsi,
 		RearPsi:  rearPsi,
@@ -160,5 +160,5 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	}
 
 	// If no tire pressure found, return an error
-	return tirePressure.TirePressureResponse{}, fmt.Errorf("no tire pressure data found in wheel-size API response")
+	return vehicle.TirePressureResponse{}, fmt.Errorf("no tire pressure data found in wheel-size API response")
 }

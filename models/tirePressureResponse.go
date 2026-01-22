@@ -1,4 +1,4 @@
-package tirePressure
+package vehicle
 
 type TirePressureResponse struct {
 	Source   string      `json:"source"`
