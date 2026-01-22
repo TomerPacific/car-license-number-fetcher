@@ -6,6 +6,7 @@ const (
 	VehicleNameKey     = "vehicleName"
 	DefaultPort        = "8080"
 	OpenAIAPIKeyEnvVar = "OPENAPI_KEY"
+	WheelSizeAPIKeyEnvVar = "WHEEL_SIZE_KEY"
 	MobileUserAgent    = "Ktor client"
 	ErrorKey           = "error"
 )
