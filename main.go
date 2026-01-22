@@ -34,7 +34,7 @@ func main() {
 	router.SetTrustedProxies(nil)
 	router.GET("/vehicle/:licensePlate", getVehiclePlateNumber)
 	router.GET("/review/:vehicleName", getVehicleReview)
-
+	router.GET("/tire-pressure/:licensePlate", getTirePressure)
 	port := getPort()
 
 	if runningServerError := router.Run(":" + port); runningServerError != nil {
@@ -161,6 +161,84 @@ func getVehicleReview(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, completion.Choices[0].Message.Content)
 
+}
+
+func getTirePressure(c *gin.Context) {
+	if !isRequestFromMobile(c.Request.UserAgent()) {
+		respondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
+		return
+	}
+	
+	licensePlate := c.Param(licensePlateKey)
+
+	if licensePlate == "" {
+		respondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
+		return
+	}
+
+	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
+
+	res, requestError := http.Get(requestUrl)
+	if requestError != nil {
+		respondWithError(c, http.StatusBadGateway, fmt.Errorf("error fetching license plate: %w", requestError))
+		return
+	}
+
+	defer res.Body.Close()
+
+	resBody, readingResponseError := io.ReadAll(res.Body)
+	if readingResponseError != nil {
+		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error parsing response: %w", readingResponseError))
+		return
+	}
+
+	var v vehicle.VehicleDetails
+	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
+		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error converting response: %w", convertingToJsonError))
+		return
+	}
+
+	if !v.Success {
+		respondWithError(c, http.StatusNotFound, errors.New("response was not successful"))
+		return
+	}
+
+	records := v.Result.Records
+
+	if len(records) == 0 {
+		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate))
+		return
+	}
+
+	var record = records[0]
+	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
+	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
+
+	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
+	if conversionError != nil {
+		respondWithError(c, http.StatusNotFound, fmt.Errorf("error converting safetyFeaturesLevel from string to int %w", conversionError))
+		return
+	}
+
+	vehicleDetails := vehicle.VehicleResponse{
+		LicenseNumber:       record.LicenseNumber,
+		ManufacturerCountry: manufacturerCountryAndName[1],
+		TrimLevel:           record.TrimLevel,
+		SafetyFeaturesLevel: safetyFeaturesLevel,
+		PollutionLevel:      record.PollutionLevel,
+		ManufacturYear:      record.ManufacturYear,
+		LastTestDate:        record.LastTestDate,
+		ValidDate:           record.ValidDate,
+		Ownership:           record.Ownership,
+		FrameNumber:         record.FrameNumber,
+		Color:               record.Color,
+		FrontWheel:          record.FrontWheel,
+		RearWheel:           record.RearWheel,
+		FuelType:            record.FuelType,
+		FirstOnRoadDate:     record.FirstOnRoadDate,
+		CommercialName:      record.CommercialName,
+		ManufacturerName:    manufacturerCountryAndName[0],
+	}
 }
 
 func respondWithError(c *gin.Context, code int, error error) {
