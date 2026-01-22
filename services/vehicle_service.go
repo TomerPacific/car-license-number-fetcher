@@ -16,7 +16,7 @@ import (
 // FetchVehicleDetailsByLicensePlate fetches and processes vehicle details from the API
 // based on the provided license plate. Returns the processed vehicle response or an error.
 func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResponse, error) {
-	requestUrl := fmt.Sprintf("%s%s", config.Endpoint, licensePlate)
+	requestUrl := fmt.Sprintf("%s%s", config.VehicleDataAPIEndpoint, licensePlate)
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
