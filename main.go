@@ -13,7 +13,6 @@ func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
 
-	// Register routes
 	router.GET("/vehicle/:licensePlate", handlers.GetVehiclePlateNumber)
 	router.GET("/review/:vehicleName", handlers.GetVehicleReview)
 	router.GET("/tire-pressure/:licensePlate", handlers.GetTirePressure)

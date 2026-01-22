@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetVehiclePlateNumber handles GET /vehicle/:licensePlate
 func GetVehiclePlateNumber(c *gin.Context) {
 	if !utils.IsRequestFromMobile(c.Request.UserAgent()) {
 		utils.RespondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
@@ -33,7 +32,6 @@ func GetVehiclePlateNumber(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, vehicleDetails)
 }
 
-// GetTirePressure handles GET /tire-pressure/:licensePlate
 func GetTirePressure(c *gin.Context) {
 	if !utils.IsRequestFromMobile(c.Request.UserAgent()) {
 		utils.RespondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
@@ -52,6 +50,6 @@ func GetTirePressure(c *gin.Context) {
 		return
 	}
 
-	// TODO: Use vehicleDetails to fetch tire pressure information
+	
 	_ = vehicleDetails
 }

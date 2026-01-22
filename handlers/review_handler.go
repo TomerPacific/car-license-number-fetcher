@@ -15,7 +15,6 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-// GetVehicleReview handles GET /review/:vehicleName
 func GetVehicleReview(c *gin.Context) {
 	if !utils.IsRequestFromMobile(c.Request.UserAgent()) {
 		utils.RespondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
