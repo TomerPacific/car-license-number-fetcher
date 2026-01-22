@@ -43,81 +43,21 @@ func main() {
 }
 
 func getVehiclePlateNumber(c *gin.Context) {
-
 	if !isRequestFromMobile(c.Request.UserAgent()) {
 		respondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
 		return
 	}
 
 	licensePlate := c.Param(licensePlateKey)
-
 	if licensePlate == "" {
 		respondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
-	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
-
-	res, requestError := http.Get(requestUrl)
-	if requestError != nil {
-		respondWithError(c, http.StatusBadGateway, fmt.Errorf("error fetching license plate: %w", requestError))
+	vehicleDetails, err := fetchVehicleDetailsByLicensePlate(licensePlate)
+	if err != nil {
+		handleVehicleDetailsError(c, err, licensePlate)
 		return
-	}
-
-	defer res.Body.Close()
-
-	resBody, readingResponseError := io.ReadAll(res.Body)
-	if readingResponseError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error parsing response: %w", readingResponseError))
-		return
-	}
-
-	var v vehicle.VehicleDetails
-	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error converting response: %w", convertingToJsonError))
-		return
-	}
-
-	if !v.Success {
-		respondWithError(c, http.StatusNotFound, errors.New("response was not successful"))
-		return
-	}
-
-	records := v.Result.Records
-
-	if len(records) == 0 {
-		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate))
-		return
-	}
-
-	var record = records[0]
-	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
-	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
-
-	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
-	if conversionError != nil {
-		respondWithError(c, http.StatusNotFound, fmt.Errorf("error converting safetyFeaturesLevel from string to int %w", conversionError))
-		return
-	}
-
-	vehicleDetails := vehicle.VehicleResponse{
-		LicenseNumber:       record.LicenseNumber,
-		ManufacturerCountry: manufacturerCountryAndName[1],
-		TrimLevel:           record.TrimLevel,
-		SafetyFeaturesLevel: safetyFeaturesLevel,
-		PollutionLevel:      record.PollutionLevel,
-		ManufacturYear:      record.ManufacturYear,
-		LastTestDate:        record.LastTestDate,
-		ValidDate:           record.ValidDate,
-		Ownership:           record.Ownership,
-		FrameNumber:         record.FrameNumber,
-		Color:               record.Color,
-		FrontWheel:          record.FrontWheel,
-		RearWheel:           record.RearWheel,
-		FuelType:            record.FuelType,
-		FirstOnRoadDate:     record.FirstOnRoadDate,
-		CommercialName:      record.CommercialName,
-		ManufacturerName:    manufacturerCountryAndName[0],
 	}
 
 	c.IndentedJSON(http.StatusOK, vehicleDetails)
@@ -168,77 +108,21 @@ func getTirePressure(c *gin.Context) {
 		respondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
 		return
 	}
-	
-	licensePlate := c.Param(licensePlateKey)
 
+	licensePlate := c.Param(licensePlateKey)
 	if licensePlate == "" {
 		respondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
-	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
-
-	res, requestError := http.Get(requestUrl)
-	if requestError != nil {
-		respondWithError(c, http.StatusBadGateway, fmt.Errorf("error fetching license plate: %w", requestError))
+	vehicleDetails, err := fetchVehicleDetailsByLicensePlate(licensePlate)
+	if err != nil {
+		handleVehicleDetailsError(c, err, licensePlate)
 		return
 	}
 
-	defer res.Body.Close()
-
-	resBody, readingResponseError := io.ReadAll(res.Body)
-	if readingResponseError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error parsing response: %w", readingResponseError))
-		return
-	}
-
-	var v vehicle.VehicleDetails
-	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
-		respondWithError(c, http.StatusInternalServerError, fmt.Errorf("error converting response: %w", convertingToJsonError))
-		return
-	}
-
-	if !v.Success {
-		respondWithError(c, http.StatusNotFound, errors.New("response was not successful"))
-		return
-	}
-
-	records := v.Result.Records
-
-	if len(records) == 0 {
-		respondWithError(c, http.StatusNotFound, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate))
-		return
-	}
-
-	var record = records[0]
-	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
-	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
-
-	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
-	if conversionError != nil {
-		respondWithError(c, http.StatusNotFound, fmt.Errorf("error converting safetyFeaturesLevel from string to int %w", conversionError))
-		return
-	}
-
-	vehicleDetails := vehicle.VehicleResponse{
-		LicenseNumber:       record.LicenseNumber,
-		ManufacturerCountry: manufacturerCountryAndName[1],
-		TrimLevel:           record.TrimLevel,
-		SafetyFeaturesLevel: safetyFeaturesLevel,
-		PollutionLevel:      record.PollutionLevel,
-		ManufacturYear:      record.ManufacturYear,
-		LastTestDate:        record.LastTestDate,
-		ValidDate:           record.ValidDate,
-		Ownership:           record.Ownership,
-		FrameNumber:         record.FrameNumber,
-		Color:               record.Color,
-		FrontWheel:          record.FrontWheel,
-		RearWheel:           record.RearWheel,
-		FuelType:            record.FuelType,
-		FirstOnRoadDate:     record.FirstOnRoadDate,
-		CommercialName:      record.CommercialName,
-		ManufacturerName:    manufacturerCountryAndName[0],
-	}
+	
+	_ = vehicleDetails
 }
 
 func respondWithError(c *gin.Context, code int, error error) {
@@ -290,5 +174,82 @@ func getQuestionBasedOnLocale(c *gin.Context, vehicleName string) string {
 	}
 
 	return fmt.Sprintf("תן רשימה של יתרונות וחסרונות של %s", vehicleName)
+}
 
+
+func fetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResponse, error) {
+	requestUrl := fmt.Sprintf("%s%s", endpoint, licensePlate)
+
+	res, requestError := http.Get(requestUrl)
+	if requestError != nil {
+		return vehicle.VehicleResponse{}, fmt.Errorf("error fetching license plate: %w", requestError)
+	}
+	defer res.Body.Close()
+
+	resBody, readingResponseError := io.ReadAll(res.Body)
+	if readingResponseError != nil {
+		return vehicle.VehicleResponse{}, fmt.Errorf("error parsing response: %w", readingResponseError)
+	}
+
+	var v vehicle.VehicleDetails
+	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
+		return vehicle.VehicleResponse{}, fmt.Errorf("error converting response: %w", convertingToJsonError)
+	}
+
+	if !v.Success {
+		return vehicle.VehicleResponse{}, errors.New("response was not successful")
+	}
+
+	records := v.Result.Records
+	if len(records) == 0 {
+		return vehicle.VehicleResponse{}, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate)
+	}
+
+	record := records[0]
+	splitManufactureCountryCharacter := getSplitCharacter(record.ManufactureCountry)
+	manufacturerCountryAndName := strings.Split(record.ManufactureCountry, splitManufactureCountryCharacter)
+
+	safetyFeaturesLevel, conversionError := parseSafetyFeaturesLevelField(record)
+	if conversionError != nil {
+		return vehicle.VehicleResponse{}, fmt.Errorf("error converting safetyFeaturesLevel from string to int: %w", conversionError)
+	}
+
+	vehicleDetails := vehicle.VehicleResponse{
+		LicenseNumber:       record.LicenseNumber,
+		ManufacturerCountry: manufacturerCountryAndName[1],
+		TrimLevel:           record.TrimLevel,
+		SafetyFeaturesLevel: safetyFeaturesLevel,
+		PollutionLevel:      record.PollutionLevel,
+		ManufacturYear:      record.ManufacturYear,
+		LastTestDate:        record.LastTestDate,
+		ValidDate:           record.ValidDate,
+		Ownership:           record.Ownership,
+		FrameNumber:         record.FrameNumber,
+		Color:               record.Color,
+		FrontWheel:          record.FrontWheel,
+		RearWheel:           record.RearWheel,
+		FuelType:            record.FuelType,
+		FirstOnRoadDate:     record.FirstOnRoadDate,
+		CommercialName:      record.CommercialName,
+		ManufacturerName:    manufacturerCountryAndName[0],
+	}
+
+	return vehicleDetails, nil
+}
+
+// handleVehicleDetailsError maps vehicle details fetch errors to appropriate HTTP responses
+func handleVehicleDetailsError(c *gin.Context, err error, licensePlate string) {
+	errMsg := err.Error()
+	
+	if strings.Contains(errMsg, "error fetching license plate") {
+		respondWithError(c, http.StatusBadGateway, err)
+	} else if strings.Contains(errMsg, "error parsing response") || strings.Contains(errMsg, "error converting response") {
+		respondWithError(c, http.StatusInternalServerError, err)
+	} else if strings.Contains(errMsg, "response was not successful") || strings.Contains(errMsg, "no matching vehicle") {
+		respondWithError(c, http.StatusNotFound, err)
+	} else if strings.Contains(errMsg, "error converting safetyFeaturesLevel") {
+		respondWithError(c, http.StatusNotFound, err)
+	} else {
+		respondWithError(c, http.StatusInternalServerError, err)
+	}
 }
