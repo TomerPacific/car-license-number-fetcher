@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	config "car-license-number-fetcher/config"
@@ -50,6 +51,11 @@ func GetTirePressure(c *gin.Context) {
 		return
 	}
 
-	
-	_ = vehicleDetails
+	tirePressureResponse, err := services.FetchTirePressureByVehicleDetails(vehicleDetails)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusBadGateway, fmt.Errorf("error fetching tire pressure: %w", err))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, tirePressureResponse)
 }
