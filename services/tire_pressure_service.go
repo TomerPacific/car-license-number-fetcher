@@ -10,6 +10,7 @@ import (
 
 	config "car-license-number-fetcher/config"
 	vehicle "car-license-number-fetcher/models"
+	"car-license-number-fetcher/utils"
 )
 
 // WheelSizeAPIResponse represents the structure of the wheel-size API response
@@ -61,8 +62,11 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API endpoint: %w", err)
 	}
 
+	// Convert manufacturer name from Hebrew to English for wheel-size API
+	englishManufacturer := utils.ConvertManufacturerToEnglish(vehicleDetails.ManufacturerName)
+	
 	params := url.Values{}
-	params.Add("make", vehicleDetails.ManufacturerName)
+	params.Add("make", englishManufacturer)
 	params.Add("model", vehicleDetails.CommercialName)
 	params.Add("year", fmt.Sprintf("%d", vehicleDetails.ManufacturYear))
 	params.Add("region", config.WheelSizeDefaultRegion)
