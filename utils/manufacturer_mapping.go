@@ -47,7 +47,6 @@ var HebrewToEnglishManufacturerMap = map[string]string{
 	"דאציה":          "dacia",
 }
 
-
 func ConvertManufacturerToEnglish(manufacturerName string) string {
 
 	manufacturerName = strings.TrimSpace(manufacturerName)
