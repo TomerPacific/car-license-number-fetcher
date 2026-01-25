@@ -51,5 +51,9 @@ func GetVehicleReview(c *gin.Context) {
 		return
 	}
 
+	if len(completion.Choices) == 0 {
+		utils.RespondWithError(c, http.StatusInternalServerError, errors.New("no completion choices returned from OpenAI"))
+		return
+	}
 	c.IndentedJSON(http.StatusOK, completion.Choices[0].Message.Content)
 }
