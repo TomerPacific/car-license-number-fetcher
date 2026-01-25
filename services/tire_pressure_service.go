@@ -53,7 +53,7 @@ type WheelSizeTirePressure struct {
 func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (vehicle.TirePressureResponse, error) {
 	apiKey := os.Getenv(config.WheelSizeAPIKeyEnvVar)
 	if apiKey == "" {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("WHEEL_SIZE_KEY environment variable is not set")
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%s environment variable is not set", config.WheelSizeAPIKeyEnvVar)
 	}
 
 	// Build the request URL with query parameters
