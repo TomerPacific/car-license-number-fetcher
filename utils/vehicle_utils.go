@@ -8,8 +8,8 @@ import (
 	vehicle "car-license-number-fetcher/models"
 )
 
-// GetSplitCharacter determines the split character for manufacture country
-// Manufacture country can sometimes be separated by a dash or by a space
+// GetSplitCharacter determines the split character for manufacturer country
+// Manufacturer country can sometimes be separated by a dash or by a space
 func GetSplitCharacter(country string) string {
 	if strings.Contains(country, "-") {
 		return "-"
