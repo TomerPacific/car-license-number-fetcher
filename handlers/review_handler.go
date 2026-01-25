@@ -32,8 +32,14 @@ func GetVehicleReview(c *gin.Context) {
 		return
 	}
 
+	apiKey := os.Getenv(config.OpenAIAPIKeyEnvVar)
+	if apiKey == "" {
+		utils.RespondWithError(c, http.StatusBadRequest, errors.New("OpenAI API key environment variable is not set"))
+		return
+	}
+
 	client := openai.NewClient(
-		option.WithAPIKey(os.Getenv(config.OpenAIAPIKeyEnvVar)))
+		option.WithAPIKey(apiKey))
 
 	language := c.GetHeader("Accept-Language")
 	question := utils.GetQuestionBasedOnLocale(language, vehicleName)
