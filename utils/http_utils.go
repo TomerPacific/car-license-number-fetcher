@@ -2,7 +2,7 @@ package utils
 
 import (
 	"net/http"
-	serrors"car-license-number-fetcher/serrors"
+	serrors "car-license-number-fetcher/serrors"
 
 	config "car-license-number-fetcher/config"
 
