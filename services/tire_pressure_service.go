@@ -48,22 +48,31 @@ type WheelSizeTirePressure struct {
 	KPa float64 `json:"kPa"`
 }
 
-// FetchTirePressureByVehicleDetails fetches tire pressure information from the wheel-size API
-// based on the provided vehicle details. Returns the tire pressure response or an error.
 func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (vehicle.TirePressureResponse, error) {
 	apiKey := os.Getenv(config.WheelSizeAPIKeyEnvVar)
 	if apiKey == "" {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("%s environment variable is not set", config.WheelSizeAPIKeyEnvVar)
 	}
 
-	// Build the request URL with query parameters
+	commercial := strings.TrimSpace(vehicleDetails.CommercialName)
+	if commercial == "" {
+		return vehicle.TirePressureResponse{}, fmt.Errorf("vehicle commercial name (model) is empty; cannot query wheel-size API")
+	}
+	if vehicleDetails.ManufacturYear <= 0 {
+		return vehicle.TirePressureResponse{}, fmt.Errorf("invalid manufacture year: %d", vehicleDetails.ManufacturYear)
+	}
+
+
 	baseURL, err := url.Parse(config.WheelSizeAPIEndpoint)
 	if err != nil {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API endpoint: %w", err)
 	}
 
-	// Convert manufacturer name from Hebrew to English for wheel-size API
 	englishManufacturer := utils.ConvertManufacturerToEnglish(vehicleDetails.ManufacturerName)
+
+	if englishManufacturer == "" {
+		return vehicle.TirePressureResponse{}, fmt.Errorf("manufacturer is empty or could not be converted to English; original: %q", vehicleDetails.ManufacturerName)
+	}
 	
 	params := url.Values{}
 	params.Add("make", englishManufacturer)
@@ -72,11 +81,9 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	params.Add("region", config.WheelSizeDefaultRegion)
 	params.Add("user_key", apiKey)
 
-	// Modification is optional - only add if we have a way to determine it
-	// For now, we'll make the request without it
+
 	baseURL.RawQuery = params.Encode()
 
-	// Create HTTP request
 	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("error creating request: %w", err)
@@ -84,7 +91,6 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 
 	req.Header.Set("accept", "application/json")
 
-	// Execute the request
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -92,36 +98,30 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	}
 	defer res.Body.Close()
 
-	// Check status code
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
 		return vehicle.TirePressureResponse{}, fmt.Errorf("wheel-size API returned status %d: %s", res.StatusCode, string(body))
 	}
 
-	// Read response body
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("error reading response: %w", err)
 	}
 
-	// Parse the response
 	var wheelSizeResponse WheelSizeAPIResponse
 	if err := json.Unmarshal(resBody, &wheelSizeResponse); err != nil {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API response: %w", err)
 	}
 
-	// Check if we have any data
 	if len(wheelSizeResponse.Data) == 0 {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("no vehicle data found in wheel-size API response")
 	}
 
-	// Extract tire pressure from the first vehicle's wheels
-	// Prefer stock wheels, otherwise use the first available wheel
+
 	vehicleData := wheelSizeResponse.Data[0]
 	var frontPsi, rearPsi *float64
 	var foundStockWheel bool
 
-	// First, try to find a stock wheel
 	for _, wheel := range vehicleData.Wheels {
 		if wheel.IsStock {
 			if wheel.Front.TirePressure != nil {
@@ -137,7 +137,6 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 		}
 	}
 
-	// If no stock wheel found, use the first wheel with tire pressure data
 	if !foundStockWheel && len(vehicleData.Wheels) > 0 {
 		firstWheel := vehicleData.Wheels[0]
 		if firstWheel.Front.TirePressure != nil {
@@ -150,7 +149,6 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 		}
 	}
 
-	// Build the response
 	tirePressureResponse := vehicle.TirePressureResponse{
 		Source:   "wheel-size.com",
 		FrontPsi: frontPsi,
@@ -158,11 +156,9 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 		Unit:     "psi",
 	}
 
-	// If we found at least one pressure value, we're good
 	if frontPsi != nil || rearPsi != nil {
 		return tirePressureResponse, nil
 	}
 
-	// If no tire pressure found, return an error
 	return vehicle.TirePressureResponse{}, fmt.Errorf("no tire pressure data found in wheel-size API response")
 }
