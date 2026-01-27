@@ -1,6 +1,11 @@
 package utils
 
-import "strings"
+import (
+	"log"
+	"strings"
+	"sync"
+	"unicode"
+)
 
 var HebrewToEnglishManufacturerMap = map[string]string{
 	"פורד":           "ford",
@@ -47,24 +52,39 @@ var HebrewToEnglishManufacturerMap = map[string]string{
 	"דאציה":          "dacia",
 }
 
-func ConvertManufacturerToEnglish(manufacturerName string) string {
+var (
+	unknownManufacturersMu sync.Mutex
+	unknownManufacturers   = map[string]struct{}{}
+)
 
+func ConvertManufacturerToEnglish(manufacturerName string) string {
 	manufacturerName = strings.TrimSpace(manufacturerName)
-	
+	if manufacturerName == "" {
+		log.Printf("ConvertManufacturerToEnglish: empty manufacturer name")
+		return ""
+	}
+
 	if isEnglish(manufacturerName) {
 		return strings.ToLower(manufacturerName)
 	}
-	
+
 	if englishName, found := HebrewToEnglishManufacturerMap[manufacturerName]; found {
-		return englishName
+		return strings.ToLower(englishName)
 	}
-	
+
+	unknownManufacturersMu.Lock()
+	if _, seen := unknownManufacturers[manufacturerName]; !seen {
+		unknownManufacturers[manufacturerName] = struct{}{}
+		log.Printf("ConvertManufacturerToEnglish: unmapped Hebrew manufacturer: %q — consider adding to HebrewToEnglishManufacturerMap", manufacturerName)
+	}
+	unknownManufacturersMu.Unlock()
+
 	return strings.ToLower(manufacturerName)
 }
 
 func isEnglish(s string) bool {
 	for _, r := range s {
-		if r > 127 {
+		if r > unicode.MaxASCII {
 			return false
 		}
 	}
