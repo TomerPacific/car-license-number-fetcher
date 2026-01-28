@@ -2,12 +2,12 @@ package utils
 
 import (
 	"net/http"
-	serrors "car-license-number-fetcher/serrors"
+	"errors"
 
 	config "car-license-number-fetcher/config"
+	serrors "car-license-number-fetcher/serrors"
 
 	"github.com/gin-gonic/gin"
-	"errors"
 )
 
 func RespondWithError(c *gin.Context, code int, err error) {
