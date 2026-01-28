@@ -51,27 +51,26 @@ type WheelSizeTirePressure struct {
 func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (vehicle.TirePressureResponse, error) {
 	apiKey := os.Getenv(config.WheelSizeAPIKeyEnvVar)
 	if apiKey == "" {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("%s environment variable is not set", config.WheelSizeAPIKeyEnvVar)
-	}
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: %s environment variable is not set", serrors.ErrInvalidVehicleDetails, config.WheelSizeAPIKeyEnvVar)
 
 	commercial := strings.TrimSpace(vehicleDetails.CommercialName)
 	if commercial == "" {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("vehicle commercial name (model) is empty; cannot query wheel-size API")
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: commercial name (model) is empty", serrors.ErrInvalidVehicleDetails)
 	}
 	if vehicleDetails.ManufacturYear <= 0 {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("invalid manufacture year: %d", vehicleDetails.ManufacturYear)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: invalid manufacture year: %d", serrors.ErrInvalidVehicleDetails, vehicleDetails.ManufacturYear)
 	}
 
 
 	baseURL, err := url.Parse(config.WheelSizeAPIEndpoint)
 	if err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API endpoint: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: error parsing wheel-size API endpoint: %v", serrors.ErrFetchTirePressure, err)
 	}
 
 	englishManufacturer := utils.ConvertManufacturerToEnglish(vehicleDetails.ManufacturerName)
 
 	if englishManufacturer == "" {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("manufacturer is empty or could not be converted to English; original: %q", vehicleDetails.ManufacturerName)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: manufacturer empty or not mapped: %q", serrors.ErrInvalidVehicleDetails, vehicleDetails.ManufacturerName)
 	}
 	
 	params := url.Values{}
@@ -86,7 +85,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 
 	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("error creating request: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: error creating request: %v", serrors.ErrFetchTirePressure, err)
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -94,27 +93,28 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("error fetching tire pressure: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: %v", serrors.ErrFetchTirePressure, err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		return vehicle.TirePressureResponse{}, fmt.Errorf("wheel-size API returned status %d: %s", res.StatusCode, string(body))
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: status %d: %s", serrors.ErrResponseNotSuccessful, res.StatusCode, string(body))
 	}
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("error reading response: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: error reading response: %v", serrors.ErrParseResponse, err)
 	}
 
 	var wheelSizeResponse WheelSizeAPIResponse
 	if err := json.Unmarshal(resBody, &wheelSizeResponse); err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("error parsing wheel-size API response: %w", err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, err)
 	}
 
 	if len(wheelSizeResponse.Data) == 0 {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("no vehicle data found in wheel-size API response")
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: no vehicle data found", serrors.ErrNoTirePressureData)
+
 	}
 
 
@@ -160,5 +160,5 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 		return tirePressureResponse, nil
 	}
 
-	return vehicle.TirePressureResponse{}, fmt.Errorf("no tire pressure data found in wheel-size API response")
+	return vehicle.TirePressureResponse{}, fmt.Errorf("%w: no tire pressure values present", serrors.ErrNoTirePressureData)
 }
