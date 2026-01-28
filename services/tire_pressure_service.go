@@ -100,7 +100,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: status %d: %s", serrors.ErrResponseNotSuccessful, res.StatusCode, string(body))
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: status %d", serrors.ErrResponseNotSuccessful, res.StatusCode)
 	}
 
 	resBody, err := io.ReadAll(res.Body)
