@@ -98,14 +98,13 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(res.Body)
-		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: status %d", serrors.ErrResponseNotSuccessful, res.StatusCode)
-	}
-
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: error reading response: %v", serrors.ErrParseResponse, err)
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: error reading response body: %v", serrors.ErrParseResponse, err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: status %d", serrors.ErrResponseNotSuccessful, res.StatusCode)
 	}
 
 	var wheelSizeResponse WheelSizeAPIResponse
