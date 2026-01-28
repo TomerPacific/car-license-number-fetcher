@@ -53,7 +53,7 @@ func GetVehicleReview(c *gin.Context) {
 	})
 
 	if err != nil {
-		utils.RespondWithError(c, http.StatusBadRequest, err)
+		utils.RespondWithError(c, http.StatusBadGateway, err)
 		return
 	}
 
