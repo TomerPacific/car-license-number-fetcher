@@ -10,4 +10,5 @@ var (
     ErrResponseNotSuccessful      = errors.New("response not successful")
     ErrNoMatchingVehicle          = errors.New("no matching vehicle")
     ErrConvertSafetyFeaturesLevel = errors.New("convert safetyFeaturesLevel")
+    ErrFetchTirePressure          = errors.New("fetch tire pressure")
 )
