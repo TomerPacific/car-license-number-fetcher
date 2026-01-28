@@ -10,6 +10,7 @@ import (
 
 	config "car-license-number-fetcher/config"
 	vehicle "car-license-number-fetcher/models"
+	serrors "car-license-number-fetcher/serrors"
 	"car-license-number-fetcher/utils"
 )
 
