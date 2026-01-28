@@ -8,16 +8,34 @@ import (
 	vehicle "car-license-number-fetcher/models"
 )
 
-// GetSplitCharacter determines the split character for manufacturer country
-// Manufacturer country can sometimes be separated by a dash or by a space
+
+// GetSplitCharacter returns the separator to use when splitting the manufacturer
+// country+name string. If multiple separators are present (for example "-" and " "),
+// the separator that appears first in the trimmed string is returned.
+// Returns a single-character string separator (default is a single space).
 func GetSplitCharacter(country string) string {
-	if strings.Contains(country, "-") {
-		return "-"
+	country = strings.TrimSpace(country)
+	if country == "" {
+		return " "
 	}
-	return " "
+
+	separators := []string{"-", "–", "—", "-", " "}
+
+	firstIdx := -1
+	chosen := " "
+
+	for _, sep := range separators {
+		if idx := strings.Index(country, sep); idx >= 0 {
+			if firstIdx == -1 || idx < firstIdx {
+				firstIdx = idx
+				chosen = sep
+			}
+		}
+	}
+
+	return chosen
 }
 
-// ParseSafetyFeaturesLevelField parses the safety features level field from a vehicle record
 func ParseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 	var safetyFeaturesLevel = 0
 	if record.SafetyFeaturesLevel != nil {
@@ -34,7 +52,6 @@ func ParseSafetyFeaturesLevelField(record vehicle.VehicleRecord) (int, error) {
 	return safetyFeaturesLevel, nil
 }
 
-// GetQuestionBasedOnLocale returns a localized question for vehicle review
 func GetQuestionBasedOnLocale(language string, vehicleName string) string {
 	if strings.HasPrefix(language, "en") {
 		return fmt.Sprintf("Give a pros and cons list of %s", vehicleName)
