@@ -15,16 +15,24 @@ func RespondWithError(c *gin.Context, code int, err error) {
 }
 
 func HandleVehicleDetailsError(c *gin.Context, err error, licensePlate string) {
-    switch {
-    case errors.Is(err, serrors.ErrFetchLicensePlate):
-        RespondWithError(c, http.StatusBadGateway, err)
-    case errors.Is(err, serrors.ErrParseResponse),
-         errors.Is(err, serrors.ErrConvertSafetyFeaturesLevel):
-        RespondWithError(c, http.StatusInternalServerError, err)
-    case errors.Is(err, serrors.ErrResponseNotSuccessful),
-         errors.Is(err, serrors.ErrNoMatchingVehicle):
-        RespondWithError(c, http.StatusNotFound, err)
-    default:
-        RespondWithError(c, http.StatusInternalServerError, err)
-    }
+	switch {
+	case errors.Is(err, serrors.ErrFetchLicensePlate),
+	     errors.Is(err, serrors.ErrFetchTirePressure):
+		RespondWithError(c, http.StatusBadGateway, err)
+
+	case errors.Is(err, serrors.ErrInvalidVehicleDetails):
+		RespondWithError(c, http.StatusBadRequest, err)
+
+	case errors.Is(err, serrors.ErrParseResponse),
+	     errors.Is(err, serrors.ErrConvertSafetyFeaturesLevel):
+		RespondWithError(c, http.StatusInternalServerError, err)
+
+	case errors.Is(err, serrors.ErrResponseNotSuccessful),
+	     errors.Is(err, serrors.ErrNoMatchingVehicle),
+	     errors.Is(err, serrors.ErrNoTirePressureData):
+		RespondWithError(c, http.StatusNotFound, err)
+
+	default:
+		RespondWithError(c, http.StatusInternalServerError, err)
+	}
 }
