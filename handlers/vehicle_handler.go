@@ -18,15 +18,15 @@ func GetVehiclePlateNumber(c *gin.Context) {
 		return
 	}
 
-	licensePlate := c.Param(config.LicensePlateKey)
-	if licensePlate == "" {
+	licenseplate := c.Param(config.LicensePlateKey)
+	if licenseplate == "" {
 		utils.RespondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
-	vehicleDetails, err := services.FetchVehicleDetailsByLicensePlate(licensePlate)
+	vehicleDetails, err := services.FetchVehicleDetailsByLicensePlate(licenseplate)
 	if err != nil {
-		utils.HandleVehicleDetailsError(c, err, licensePlate)
+		utils.HandleVehicleDetailsError(c, err, licenseplate)
 		return
 	}
 
@@ -39,15 +39,15 @@ func GetTirePressure(c *gin.Context) {
 		return
 	}
 
-	licensePlate := c.Param(config.LicensePlateKey)
-	if licensePlate == "" {
+	licenseplate := c.Param(config.LicensePlateKey)
+	if licenseplate == "" {
 		utils.RespondWithError(c, http.StatusBadRequest, errors.New("license Plate was not found in request"))
 		return
 	}
 
-	vehicleDetails, err := services.FetchVehicleDetailsByLicensePlate(licensePlate)
+	vehicleDetails, err := services.FetchVehicleDetailsByLicensePlate(licenseplate)
 	if err != nil {
-		utils.HandleVehicleDetailsError(c, err, licensePlate)
+		utils.HandleVehicleDetailsError(c, err, licenseplate)
 		return
 	}
 
