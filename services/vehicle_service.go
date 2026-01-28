@@ -13,34 +13,32 @@ import (
 	"car-license-number-fetcher/utils"
 )
 
-// FetchVehicleDetailsByLicensePlate fetches and processes vehicle details from the API
-// based on the provided license plate. Returns the processed vehicle response or an error.
 func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResponse, error) {
 	requestUrl := fmt.Sprintf("%s%s", config.VehicleDataAPIEndpoint, licensePlate)
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("error fetching license plate: %w", requestError)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrFetchLicensePlate, requestErr)
 	}
 	defer res.Body.Close()
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("error parsing response: %w", readingResponseError)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, readingResponseErr)
 	}
 
 	var v vehicle.VehicleDetails
 	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("error converting response: %w", convertingToJsonError)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, convertingToJsonErr)
 	}
 
 	if !v.Success {
-		return vehicle.VehicleResponse{}, errors.New("response was not successful")
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w", serrors.ErrResponseNotSuccessful)
 	}
 
 	records := v.Result.Records
 	if len(records) == 0 {
-		return vehicle.VehicleResponse{}, fmt.Errorf("no matching vehicle for the license plate entered %s", licensePlate)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: no matching vehicle for license plate %s", serrors.ErrNoMatchingVehicle, licensePlate)
 	}
 
 	record := records[0]
@@ -49,7 +47,7 @@ func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResp
 
 	safetyFeaturesLevel, conversionError := utils.ParseSafetyFeaturesLevelField(record)
 	if conversionError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("error converting safetyFeaturesLevel from string to int: %w", conversionError)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrConvertSafetyFeaturesLevel, conversionErr)
 	}
 
 	vehicleDetails := vehicle.VehicleResponse{
