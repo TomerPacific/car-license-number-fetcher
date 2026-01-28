@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	config "car-license-number-fetcher/config"
 	vehicle "car-license-number-fetcher/models"
