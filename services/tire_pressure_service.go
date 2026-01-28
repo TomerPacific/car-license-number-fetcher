@@ -76,7 +76,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	
 	params := url.Values{}
 	params.Add("make", englishManufacturer)
-	params.Add("model", vehicleDetails.CommercialName)
+	params.Add("model", commercial)
 	params.Add("year", fmt.Sprintf("%d", vehicleDetails.ManufacturYear))
 	params.Add("region", config.WheelSizeDefaultRegion)
 	params.Add("user_key", apiKey)
