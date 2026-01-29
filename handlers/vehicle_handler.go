@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	config "car-license-number-fetcher/config"
@@ -15,13 +14,21 @@ import (
 
 func GetVehiclePlateNumber(c *gin.Context) {
 	if !utils.IsRequestFromMobile(c.Request.UserAgent()) {
-		utils.RespondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
+		utils.RespondWithError(
+			c,
+			http.StatusBadRequest,
+			fmt.Errorf("%w: request is not from a mobile device", serrors.ErrInvalidVehicleDetails),
+		)
 		return
 	}
 
 	licensePlate := c.Param(config.LicensePlateKey)
 	if licensePlate == "" {
-		utils.RespondWithError(c, http.StatusBadRequest, errors.New("license plate was not found in request"))
+		utils.RespondWithError(
+			c,
+			http.StatusBadRequest,
+			fmt.Errorf("%w: license plate missing from request", serrors.ErrInvalidVehicleDetails),
+		)
 		return
 	}
 
@@ -36,13 +43,21 @@ func GetVehiclePlateNumber(c *gin.Context) {
 
 func GetTirePressure(c *gin.Context) {
 	if !utils.IsRequestFromMobile(c.Request.UserAgent()) {
-		utils.RespondWithError(c, http.StatusBadRequest, errors.New("request is not from a mobile device"))
+		utils.RespondWithError(
+			c,
+			http.StatusBadRequest,
+			fmt.Errorf("%w: request is not from a mobile device", serrors.ErrInvalidVehicleDetails),
+		)
 		return
 	}
 
 	licensePlate := c.Param(config.LicensePlateKey)
 	if licensePlate == "" {
-		utils.RespondWithError(c, http.StatusBadRequest, errors.New("license plate was not found in request"))
+		utils.RespondWithError(
+			c,
+			http.StatusBadRequest,
+			fmt.Errorf("%w: license plate missing from request", serrors.ErrInvalidVehicleDetails),
+		)
 		return
 	}
 
