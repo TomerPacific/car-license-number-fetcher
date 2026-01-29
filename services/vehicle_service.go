@@ -18,7 +18,7 @@ func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResp
 
 	res, requestError := http.Get(requestUrl)
 	if requestError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrFetchLicensePlate, requestErr)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrFetchLicensePlate, requestError)
 	}
 	defer res.Body.Close()
 
