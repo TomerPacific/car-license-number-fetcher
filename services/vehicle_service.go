@@ -24,12 +24,12 @@ func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResp
 
 	resBody, readingResponseError := io.ReadAll(res.Body)
 	if readingResponseError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, readingResponseErr)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, readingResponseError)
 	}
 
 	var v vehicle.VehicleDetails
 	if convertingToJsonError := json.Unmarshal(resBody, &v); convertingToJsonError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, convertingToJsonErr)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrParseResponse, convertingToJsonError)
 	}
 
 	if !v.Success {
@@ -47,7 +47,7 @@ func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResp
 
 	safetyFeaturesLevel, conversionError := utils.ParseSafetyFeaturesLevelField(record)
 	if conversionError != nil {
-		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrConvertSafetyFeaturesLevel, conversionErr)
+		return vehicle.VehicleResponse{}, fmt.Errorf("%w: %v", serrors.ErrConvertSafetyFeaturesLevel, conversionError)
 	}
 
 	vehicleDetails := vehicle.VehicleResponse{
