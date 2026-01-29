@@ -54,10 +54,7 @@ func GetTirePressure(c *gin.Context) {
 
 	tirePressureResponse, err := services.FetchTirePressureByVehicleDetails(vehicleDetails)
 	if err != nil {
-		utils.RespondWithError(
-			c, 
-			http.StatusInternalServerError,
-			fmt.Errorf("%w: %v", serrors.ErrFetchTirePressure, err))
+		utils.HandleVehicleDetailsError(c, err, licensePlate)
 		return
 	}
 
