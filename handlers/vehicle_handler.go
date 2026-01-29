@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 
 	config "car-license-number-fetcher/config"
