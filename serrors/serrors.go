@@ -9,6 +9,6 @@ var (
     ErrNoMatchingVehicle          = errors.New("no matching vehicle")
     ErrConvertSafetyFeaturesLevel = errors.New("convert safetyFeaturesLevel")
     ErrFetchTirePressure          = errors.New("fetch tire pressure")
-    ErrNoTirePressureData    = errors.New("no tire pressure data")
-    ErrInvalidVehicleDetails = errors.New("invalid vehicle details")
+    ErrNoTirePressureData         = errors.New("no tire pressure data")
+    ErrInvalidVehicleDetails      = errors.New("invalid vehicle details")
 )
