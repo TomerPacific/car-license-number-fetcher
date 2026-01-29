@@ -54,7 +54,7 @@ func FetchTirePressureByVehicleDetails(vehicleDetails vehicle.VehicleResponse) (
 	apiKey := os.Getenv(config.WheelSizeAPIKeyEnvVar)
 	if apiKey == "" {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: %s environment variable is not set", serrors.ErrInvalidVehicleDetails, config.WheelSizeAPIKeyEnvVar)
-
+	}
 	commercial := strings.TrimSpace(vehicleDetails.CommercialName)
 	if commercial == "" {
 		return vehicle.TirePressureResponse{}, fmt.Errorf("%w: commercial name (model) is empty", serrors.ErrInvalidVehicleDetails)
