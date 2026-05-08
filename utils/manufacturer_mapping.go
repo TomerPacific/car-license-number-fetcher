@@ -72,7 +72,7 @@ var carManufacturerNameTranslationToEnglish = map[string]string{
 	"לנד רובר":          "Land Rover",
 	"לקסוס":             "Lexus",
 	"לינקולן":           "Lincoln",
-	"ליפמוטור":          "Leafmotor",
+	"ליפמוטור":          "Leapmotor",
 	"לנצ'יה":            "Lancia",
 	"מזדה":              "Mazda",
 	"מאן":               "Man",
@@ -158,7 +158,7 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 	}
 	unknownManufacturersMu.Unlock()
 
-	return slugifyManufacturerName(manufacturerName)
+	return ""
 }
 
 func TranslateManufacturerNameToEnglish(manufacturerName string) string {
