@@ -71,5 +71,5 @@ type VehicleResponse struct {
 	FirstOnRoadDate     string `json:"first_on_road_date"`
 	CommercialName      string `json:"commercial_name"`
 	ManufacturerName    string `json:"manufacturer_name"`
-	ManufacturerNameEN  string `json:"manufacturer_name_translation_to_english"`
+	ManufacturerNameEN  string `json:"manufacturer_name_en"`
 }
