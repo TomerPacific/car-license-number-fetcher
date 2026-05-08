@@ -49,7 +49,7 @@ var CarManufacturerNameTranslationToEnglish = map[string]string{
 	"דודג'":             "Dodge",
 	"דונגפנג":           "Dongfeng",
 	"די.אס":             "DS",
-	"דייהו":             "Daewood",
+	"דייהו":             "Daewoo",
 	"דייהטסו":           "Daihatsu",
 	"דיפאל":             "Deepal",
 	"האמר":              "Hummer",
@@ -151,7 +151,7 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 		return "nissan"
 	case "מיצובישי":
 		return "mitsubishi"
-	case "BMW":
+	case "ב.מ.וו":
 		return "bmw"
 	case "מרצדס":
 		return "mercedes-benz"
@@ -246,7 +246,7 @@ func TranslateManufacturerNameToEnglish(manufacturerName string) string {
 		return manufacturerName
 	}
 
-	return manufacturerName
+	return ""
 }
 
 func isEnglish(s string) bool {
