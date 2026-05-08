@@ -88,7 +88,7 @@ var carManufacturerNameTranslationToEnglish = map[string]string{
 	"ניסאן":             "Nissan",
 	"ננג'ינג":           "Nanjing",
 	"סאאב":              "Saab",
-	"סאנגיונג":          "Sangyong",
+	"סאנגיונג":          "SsangYong",
 	"סאנשיין":           "Sunshine",
 	"סובארו":            "Subaru",
 	"סוזוקי":            "Suzuki",
