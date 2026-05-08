@@ -7,44 +7,44 @@ import (
 	"unicode"
 )
 
-var CarManufacturerNameTranslationToEnglish = map[string]string{
+var carManufacturerNameTranslationToEnglish = map[string]string{
 	"אאודי":             "Audi",
 	"אבארט":             "Abarth",
 	"אווטאר":            "Avatar",
-	"אוטוביאנקי":         "Autobianchi",
+	"אוטוביאנקי":        "Autobianchi",
 	"איוויס":            "Aiways",
-	"אי.וי.איזי":         "A.V.EZ",
+	"אי.וי.איזי":        "A.V.EZ",
 	"אופל":              "Opel",
 	"אורה":              "Ora",
 	"איווקו":            "Iveco",
 	"אניאוס":            "Ineos",
 	"איסוזו":            "Isuzu",
 	"אינפיניטי":         "Infiniti",
-	"אלפא רומיאו":        "Alfa Romeo",
+	"אלפא רומיאו":       "Alfa Romeo",
 	"אם.ג'י":            "MG",
-	"אסטון מרטין":        "Aston Martin",
-	"אל.אי.וי.סי":        "L.E.V.C",
-	"אל.טי.איי":          "L.T.I",
+	"אסטון מרטין":       "Aston Martin",
+	"אל.אי.וי.סי":       "L.E.V.C",
+	"אל.טי.איי":         "L.T.I",
 	"אלפין":             "Alpine",
-	"אם דאבל יו אם":      "M.W.M",
+	"אם דאבל יו אם":     "M.W.M",
 	"אקורה":             "Acura",
-	"אקס אי וי":          "XEV",
+	"אקס אי וי":         "XEV",
 	"אקספנג":            "XPeng",
 	"ב.מ.וו":            "BMW",
-	"בי.אי.דבאליו":       "B.I.W",
+	"בי.אי.דבאליו":      "B.I.W",
 	"ביואיק":            "Buick",
 	"בנטלי":             "Bentley",
 	"ג'אקו":             "Jaecoo",
-	"ג'י.איי.סי":         "GAC",
-	"ג'י.אם.סי":          "GMC",
+	"ג'י.איי.סי":        "GAC",
+	"ג'י.אם.סי":         "GMC",
 	"ג'ילי":             "Geely",
 	"ג'נסיס":            "Genesis",
 	"גופיל":             "Goupil",
 	"ג'יפ":              "Jeep",
 	"גיאיוואן":          "Gyon",
-	"גרייט וול":          "Great Wall",
-	"ג'יי.איי.סי":        "JAC",
-	"דאבל יו אם מוטורס":  "W.M. Motors",
+	"גרייט וול":         "Great Wall",
+	"ג'יי.איי.סי":       "JAC",
+	"דאבל יו אם מוטורס": "W.M. Motors",
 	"דאצ'יה":            "Dacia",
 	"דודג'":             "Dodge",
 	"דונגפנג":           "Dongfeng",
@@ -67,8 +67,8 @@ var CarManufacturerNameTranslationToEnglish = map[string]string{
 	"יודו":              "Yudo",
 	"לאדה":              "Lada",
 	"לוטוס":             "Lotus",
-	"לינק אנד קו":        "Lynk & Co",
-	"למבורגיני":          "Lamborghini",
+	"לינק אנד קו":       "Lynk & Co",
+	"למבורגיני":         "Lamborghini",
 	"לנד רובר":          "Land Rover",
 	"לקסוס":             "Lexus",
 	"לינקולן":           "Lincoln",
@@ -103,7 +103,7 @@ var CarManufacturerNameTranslationToEnglish = map[string]string{
 	"פיאט":              "Fiat",
 	"פיג'ו":             "Peugeot",
 	"פולסטאר":           "Polestar",
-	"פולקסווגן":          "Volkswagen",
+	"פולקסווגן":         "Volkswagen",
 	"פורד":              "Ford",
 	"פורשה":             "Porsche",
 	"פרארי":             "Ferrari",
@@ -123,6 +123,13 @@ var CarManufacturerNameTranslationToEnglish = map[string]string{
 	"שברולט":            "Chevrolet",
 }
 
+var englishManufacturerToLegacySlug = map[string]string{
+	"Mercedes":    "mercedes-benz",
+	"Alfa Romeo":  "alfa-romeo",
+	"Land Rover":  "land-rover",
+	"Rolls-Royce": "rolls-royce",
+}
+
 var (
 	unknownManufacturersMu sync.Mutex
 	unknownManufacturers   = map[string]struct{}{}
@@ -135,90 +142,13 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 		return ""
 	}
 
-	if isEnglish(manufacturerName) {
-		return strings.ToLower(manufacturerName)
+	if isLatinManufacturerName(manufacturerName) {
+		return slugifyManufacturerName(manufacturerName)
 	}
 
 	normalizedManufacturerName := normalizeManufacturerName(manufacturerName)
-	switch normalizedManufacturerName {
-	case "פורד":
-		return "ford"
-	case "טויוטה":
-		return "toyota"
-	case "הונדה":
-		return "honda"
-	case "ניסאן":
-		return "nissan"
-	case "מיצובישי":
-		return "mitsubishi"
-	case "ב.מ.וו":
-		return "bmw"
-	case "מרצדס":
-		return "mercedes-benz"
-	case "אאודי":
-		return "audi"
-	case "פולקסווגן":
-		return "volkswagen"
-	case "יונדאי":
-		return "hyundai"
-	case "קיה":
-		return "kia"
-	case "מזדה":
-		return "mazda"
-	case "סובארו":
-		return "subaru"
-	case "לקסוס":
-		return "lexus"
-	case "אינפיניטי":
-		return "infiniti"
-	case "וולוו":
-		return "volvo"
-	case "פיאט":
-		return "fiat"
-	case "אלפא רומיאו":
-		return "alfa-romeo"
-	case "פיג'ו":
-		return "peugeot"
-	case "רנו":
-		return "renault"
-	case "סיטרואן":
-		return "citroen"
-	case "סקודה":
-		return "skoda"
-	case "סיאט":
-		return "seat"
-	case "לנד רובר":
-		return "land-rover"
-	case "ג'יפ":
-		return "jeep"
-	case "דודג'":
-		return "dodge"
-	case "שברולט":
-		return "chevrolet"
-	case "קאדילק":
-		return "cadillac"
-	case "לינקולן":
-		return "lincoln"
-	case "פורשה":
-		return "porsche"
-	case "מיני":
-		return "mini"
-	case "יגואר":
-		return "jaguar"
-	case "בנטלי":
-		return "bentley"
-	case "רולס רויס":
-		return "rolls-royce"
-	case "מזראטי":
-		return "maserati"
-	case "למבורגיני":
-		return "lamborghini"
-	case "פרארי":
-		return "ferrari"
-	case "אופל":
-		return "opel"
-	case "דאצ'יה":
-		return "dacia"
+	if translatedName, found := carManufacturerNameTranslationToEnglish[normalizedManufacturerName]; found {
+		return slugifyManufacturerName(translatedName)
 	}
 
 	unknownManufacturersMu.Lock()
@@ -228,7 +158,7 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 	}
 	unknownManufacturersMu.Unlock()
 
-	return strings.ToLower(manufacturerName)
+	return slugifyManufacturerName(manufacturerName)
 }
 
 func TranslateManufacturerNameToEnglish(manufacturerName string) string {
@@ -238,24 +168,58 @@ func TranslateManufacturerNameToEnglish(manufacturerName string) string {
 	}
 
 	normalizedManufacturerName := normalizeManufacturerName(manufacturerName)
-	if translatedName, found := CarManufacturerNameTranslationToEnglish[normalizedManufacturerName]; found {
+	if translatedName, found := carManufacturerNameTranslationToEnglish[normalizedManufacturerName]; found {
 		return translatedName
 	}
 
-	if isEnglish(manufacturerName) {
+	if isLatinManufacturerName(manufacturerName) {
 		return manufacturerName
 	}
 
 	return ""
 }
 
-func isEnglish(s string) bool {
+func isLatinManufacturerName(s string) bool {
+	hasLatinLetter := false
 	for _, r := range s {
-		if r > unicode.MaxASCII {
+		switch {
+		case unicode.IsLetter(r):
+			if !unicode.In(r, unicode.Latin) {
+				return false
+			}
+			hasLatinLetter = true
+		case unicode.IsDigit(r):
+			continue
+		case unicode.IsSpace(r):
+			continue
+		case strings.ContainsRune("&-.'/", r):
+			continue
+		default:
 			return false
 		}
 	}
-	return true
+	return hasLatinLetter
+}
+
+func slugifyManufacturerName(manufacturerName string) string {
+	if slug, found := englishManufacturerToLegacySlug[manufacturerName]; found {
+		return slug
+	}
+
+	slug := strings.ToLower(strings.TrimSpace(manufacturerName))
+	slug = strings.ReplaceAll(slug, "&", " and ")
+	slug = strings.Map(func(r rune) rune {
+		switch {
+		case unicode.IsLetter(r), unicode.IsDigit(r):
+			return r
+		case unicode.IsSpace(r), r == '-', r == '.', r == '\'' || r == '/':
+			return '-'
+		default:
+			return -1
+		}
+	}, slug)
+
+	return strings.Join(strings.FieldsFunc(slug, func(r rune) bool { return r == '-' }), "-")
 }
 
 func normalizeManufacturerName(manufacturerName string) string {
