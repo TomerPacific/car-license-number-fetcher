@@ -142,13 +142,13 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 		return ""
 	}
 
-	if isLatinManufacturerName(manufacturerName) {
-		return slugifyManufacturerName(manufacturerName)
+	translatedName := TranslateManufacturerNameToEnglish(manufacturerName)
+	if translatedName != "" {
+		return slugifyManufacturerName(translatedName)
 	}
 
-	normalizedManufacturerName := normalizeManufacturerName(manufacturerName)
-	if translatedName, found := carManufacturerNameTranslationToEnglish[normalizedManufacturerName]; found {
-		return slugifyManufacturerName(translatedName)
+	if !containsLetterOrDigit(manufacturerName) {
+		return ""
 	}
 
 	unknownManufacturersMu.Lock()
@@ -190,6 +190,16 @@ func isLatinManufacturerName(s string) bool {
 		}
 	}
 	return hasLatinLetter
+}
+
+func containsLetterOrDigit(s string) bool {
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func slugifyManufacturerName(manufacturerName string) string {
