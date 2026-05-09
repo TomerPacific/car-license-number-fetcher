@@ -20,8 +20,8 @@ func TestTranslateManufacturerNameToEnglish(t *testing.T) {
 		},
 		{
 			name:  "keeps latin names with diacritics",
-			input: "Peugéot",
-			want:  "Peugéot",
+			input: "Citroën",
+			want:  "Citroën",
 		},
 		{
 			name:  "returns empty for unmapped non latin",
