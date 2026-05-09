@@ -124,10 +124,10 @@ var carManufacturerNameTranslationToEnglish = map[string]string{
 }
 
 var englishManufacturerToLegacySlug = map[string]string{
-	"Mercedes":    "mercedes-benz",
-	"Alfa Romeo":  "alfa-romeo",
-	"Land Rover":  "land-rover",
-	"Rolls-Royce": "rolls-royce",
+	"mercedes":    "mercedes-benz",
+	"alfa romeo":  "alfa-romeo",
+	"land rover":  "land-rover",
+	"rolls-royce": "rolls-royce",
 }
 
 var (
@@ -154,7 +154,7 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 	unknownManufacturersMu.Lock()
 	if _, seen := unknownManufacturers[manufacturerName]; !seen {
 		unknownManufacturers[manufacturerName] = struct{}{}
-		log.Printf("ConvertManufacturerToEnglish: unmapped Hebrew manufacturer: %q — consider adding translation support", manufacturerName)
+		log.Printf("ConvertManufacturerToEnglish: unmapped manufacturer: %q — consider adding translation support", manufacturerName)
 	}
 	unknownManufacturersMu.Unlock()
 
@@ -182,31 +182,23 @@ func TranslateManufacturerNameToEnglish(manufacturerName string) string {
 func isLatinManufacturerName(s string) bool {
 	hasLatinLetter := false
 	for _, r := range s {
-		switch {
-		case unicode.IsLetter(r):
+		if unicode.IsLetter(r) {
 			if !unicode.In(r, unicode.Latin) {
 				return false
 			}
 			hasLatinLetter = true
-		case unicode.IsDigit(r):
-			continue
-		case unicode.IsSpace(r):
-			continue
-		case strings.ContainsRune("&-.'/", r):
-			continue
-		default:
-			return false
 		}
 	}
 	return hasLatinLetter
 }
 
 func slugifyManufacturerName(manufacturerName string) string {
-	if slug, found := englishManufacturerToLegacySlug[manufacturerName]; found {
+	normalizedManufacturerName := strings.ToLower(strings.TrimSpace(manufacturerName))
+	if slug, found := englishManufacturerToLegacySlug[normalizedManufacturerName]; found {
 		return slug
 	}
 
-	slug := strings.ToLower(strings.TrimSpace(manufacturerName))
+	slug := normalizedManufacturerName
 	slug = strings.ReplaceAll(slug, "&", " and ")
 	slug = strings.Map(func(r rune) rune {
 		switch {
