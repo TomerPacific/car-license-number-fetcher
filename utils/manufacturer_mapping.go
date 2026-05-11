@@ -7,49 +7,127 @@ import (
 	"unicode"
 )
 
-var HebrewToEnglishManufacturerMap = map[string]string{
-	"פורד":           "ford",
-	"טויוטה":         "toyota",
-	"הונדה":          "honda",
-	"ניסאן":          "nissan",
-	"ניסן":           "nissan",
-	"מיצובישי":        "mitsubishi",
-	"מיצובישי-פוג'ו":   "mitsubishi",
-	"BMW":            "bmw",
-	"מרצדס":          "mercedes-benz",
-	"מרצדס-בנץ":       "mercedes-benz",
-	"אאודי":          "audi",
-	"פולקסווגן":       "volkswagen",
-	"יונדאי":         "hyundai",
-	"קיה":            "kia",
-	"מזדה":           "mazda",
-	"סובארו":         "subaru",
-	"לקסוס":          "lexus",
-	"אינפיניטי":       "infiniti",
-	"וולוו":          "volvo",
-	"פיאט":           "fiat",
-	"אלפא רומיאו":     "alfa-romeo",
-	"פיג'ו":          "peugeot",
-	"רנו":            "renault",
-	"סיטרואן":        "citroen",
-	"סקודה":          "skoda",
-	"סיאט":           "seat",
-	"לנד רובר":       "land-rover",
-	"ג'יפ":           "jeep",
-	"דודג'":          "dodge",
-	"שברולט":         "chevrolet",
-	"קדילאק":         "cadillac",
-	"לינקולן":        "lincoln",
-	"פורשה":          "porsche",
-	"מיני":           "mini",
-	"יגואר":          "jaguar",
-	"בנטלי":          "bentley",
-	"רולס רויס":      "rolls-royce",
-	"מזראטי":         "maserati",
-	"למבורגיני":      "lamborghini",
-	"פרארי":          "ferrari",
-	"אופל":           "opel",
-	"דאציה":          "dacia",
+var carManufacturerNameTranslationToEnglish = map[string]string{
+	"אאודי":             "Audi",
+	"אבארט":             "Abarth",
+	"אווטאר":            "Avatar",
+	"אוטוביאנקי":        "Autobianchi",
+	"איוויס":            "Aiways",
+	"אי.וי.איזי":        "A.V.EZ",
+	"אופל":              "Opel",
+	"אורה":              "Ora",
+	"איווקו":            "Iveco",
+	"אניאוס":            "Ineos",
+	"איסוזו":            "Isuzu",
+	"אינפיניטי":         "Infiniti",
+	"אלפא רומיאו":       "Alfa Romeo",
+	"אם.ג'י":            "MG",
+	"אסטון מרטין":       "Aston Martin",
+	"אל.אי.וי.סי":       "L.E.V.C",
+	"אל.טי.איי":         "L.T.I",
+	"אלפין":             "Alpine",
+	"אם דאבל יו אם":     "M.W.M",
+	"אקורה":             "Acura",
+	"אקס אי וי":         "XEV",
+	"אקספנג":            "XPeng",
+	"ב.מ.וו":            "BMW",
+	"בי.אי.דבאליו":      "B.I.W",
+	"ביואיק":            "Buick",
+	"בנטלי":             "Bentley",
+	"ג'אקו":             "Jaecoo",
+	"ג'י.איי.סי":        "GAC",
+	"ג'י.אם.סי":         "GMC",
+	"ג'ילי":             "Geely",
+	"ג'נסיס":            "Genesis",
+	"גופיל":             "Goupil",
+	"ג'יפ":              "Jeep",
+	"גיאיוואן":          "Gyon",
+	"גרייט וול":         "Great Wall",
+	"ג'יי.איי.סי":       "JAC",
+	"דאבל יו אם מוטורס": "W.M. Motors",
+	"דאצ'יה":            "Dacia",
+	"דודג'":             "Dodge",
+	"דונגפנג":           "Dongfeng",
+	"די.אס":             "DS",
+	"דייהו":             "Daewoo",
+	"דייהטסו":           "Daihatsu",
+	"דיפאל":             "Deepal",
+	"האמר":              "Hummer",
+	"הונגצ'י":           "Hongqi",
+	"הונדה":             "Honda",
+	"וויה":              "Voyah",
+	"ווי":               "Wey",
+	"וולוו":             "Volvo",
+	"זיקר":              "Zeekr",
+	"טאטא":              "Tata",
+	"טויוטה":            "Toyota",
+	"טסלה":              "Tesla",
+	"יגואר":             "Jaguar",
+	"יונדאי":            "Hyundai",
+	"יודו":              "Yudo",
+	"לאדה":              "Lada",
+	"לוטוס":             "Lotus",
+	"לינק אנד קו":       "Lynk & Co",
+	"למבורגיני":         "Lamborghini",
+	"לנד רובר":          "Land Rover",
+	"לקסוס":             "Lexus",
+	"לינקולן":           "Lincoln",
+	"ליפמוטור":          "Leapmotor",
+	"לנצ'יה":            "Lancia",
+	"מזדה":              "Mazda",
+	"מאן":               "Man",
+	"מורגן":             "Morgan",
+	"מזראטי":            "Maserati",
+	"מיני":              "Mini",
+	"מיצובישי":          "Mitsubishi",
+	"מקלארן":            "McLaren",
+	"מקסוס":             "Maxus",
+	"מרצדס":             "Mercedes",
+	"נטע":               "Neta",
+	"ניאו":              "Nio",
+	"ניסאן":             "Nissan",
+	"ננג'ינג":           "Nanjing",
+	"סאאב":              "Saab",
+	"סאנגיונג":          "SsangYong",
+	"סאנשיין":           "Sunshine",
+	"סובארו":            "Subaru",
+	"סוזוקי":            "Suzuki",
+	"סיטרואן":           "Citroen",
+	"סיאט":              "Seat",
+	"סקודה":             "Skoda",
+	"סרס":               "Seres",
+	"סמארט":             "Smart",
+	"סנטרו":             "Santro",
+	"סקיוול":            "Skywell",
+	"פוטון":             "Foton",
+	"פיאט":              "Fiat",
+	"פיג'ו":             "Peugeot",
+	"פולסטאר":           "Polestar",
+	"פולקסווגן":         "Volkswagen",
+	"פורד":              "Ford",
+	"פורשה":             "Porsche",
+	"פרארי":             "Ferrari",
+	"פורתינג":           "Forthing",
+	"פיאג'ו":            "Piaggio",
+	"צ'רי":              "Chery",
+	"קאדילק":            "Cadillac",
+	"קארמה":             "Karma",
+	"קיה":               "Kia",
+	"קופרה":             "Cupra",
+	"קרייזלר":           "Chrysler",
+	"ראם":               "Ram",
+	"רובר":              "Rover",
+	"רנו":               "Renault",
+	"ריהיי":             "Reyee",
+	"רולס רויס":         "Rolls-Royce",
+	"שברולט":            "Chevrolet",
+}
+
+var englishManufacturerToLegacySlug = map[string]string{
+	"mercedes":    "mercedes-benz",
+	"alfa romeo":  "alfa-romeo",
+	"land rover":  "land-rover",
+	"rolls-royce": "rolls-royce",
 }
 
 var (
@@ -64,29 +142,101 @@ func ConvertManufacturerToEnglish(manufacturerName string) string {
 		return ""
 	}
 
-	if isEnglish(manufacturerName) {
-		return strings.ToLower(manufacturerName)
+	translatedName := TranslateManufacturerNameToEnglish(manufacturerName)
+	if translatedName != "" {
+		return slugifyManufacturerName(translatedName)
 	}
 
-	if englishName, found := HebrewToEnglishManufacturerMap[manufacturerName]; found {
-		return strings.ToLower(englishName)
+	if !containsLetterOrDigit(manufacturerName) {
+		return ""
 	}
 
 	unknownManufacturersMu.Lock()
 	if _, seen := unknownManufacturers[manufacturerName]; !seen {
 		unknownManufacturers[manufacturerName] = struct{}{}
-		log.Printf("ConvertManufacturerToEnglish: unmapped Hebrew manufacturer: %q — consider adding to HebrewToEnglishManufacturerMap", manufacturerName)
+		log.Printf("ConvertManufacturerToEnglish: unmapped manufacturer: %q — consider adding translation support", manufacturerName)
 	}
 	unknownManufacturersMu.Unlock()
 
-	return strings.ToLower(manufacturerName)
+	return ""
 }
 
-func isEnglish(s string) bool {
+func TranslateManufacturerNameToEnglish(manufacturerName string) string {
+	manufacturerName = strings.TrimSpace(manufacturerName)
+	if manufacturerName == "" {
+		return ""
+	}
+
+	normalizedManufacturerName := normalizeManufacturerName(manufacturerName)
+	if translatedName, found := carManufacturerNameTranslationToEnglish[normalizedManufacturerName]; found {
+		return translatedName
+	}
+
+	if isLatinManufacturerName(manufacturerName) {
+		return manufacturerName
+	}
+
+	return ""
+}
+
+func isLatinManufacturerName(s string) bool {
+	hasLatinLetter := false
 	for _, r := range s {
-		if r > unicode.MaxASCII {
-			return false
+		if unicode.IsLetter(r) {
+			if !unicode.In(r, unicode.Latin) {
+				return false
+			}
+			hasLatinLetter = true
 		}
 	}
-	return true
+	return hasLatinLetter
+}
+
+func containsLetterOrDigit(s string) bool {
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func slugifyManufacturerName(manufacturerName string) string {
+	normalizedManufacturerName := strings.ToLower(strings.TrimSpace(manufacturerName))
+	if slug, found := englishManufacturerToLegacySlug[normalizedManufacturerName]; found {
+		return slug
+	}
+
+	slug := normalizedManufacturerName
+	slug = strings.ReplaceAll(slug, "&", " and ")
+	slug = strings.Map(func(r rune) rune {
+		switch {
+		case unicode.IsLetter(r), unicode.IsDigit(r):
+			return r
+		case unicode.IsSpace(r), r == '-', r == '.', r == '\'' || r == '/':
+			return '-'
+		default:
+			return -1
+		}
+	}, slug)
+
+	return strings.Join(strings.FieldsFunc(slug, func(r rune) bool { return r == '-' }), "-")
+}
+
+func normalizeManufacturerName(manufacturerName string) string {
+	switch manufacturerName {
+	case "ניסן":
+		return "ניסאן"
+	case "מיצובישי-פוג'ו":
+		return "מיצובישי"
+	case "מרצדס-בנץ":
+		return "מרצדס"
+	case "קדילאק":
+		return "קאדילק"
+	case "דאציה":
+		return "דאצ'יה"
+	default:
+		return manufacturerName
+	}
 }

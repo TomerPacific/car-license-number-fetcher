@@ -68,6 +68,7 @@ func FetchVehicleDetailsByLicensePlate(licensePlate string) (vehicle.VehicleResp
 		FirstOnRoadDate:     record.FirstOnRoadDate,
 		CommercialName:      record.CommercialName,
 		ManufacturerName:    manufacturerCountryAndName[0],
+		ManufacturerNameEN:  utils.TranslateManufacturerNameToEnglish(manufacturerCountryAndName[0]),
 	}
 
 	return vehicleDetails, nil
